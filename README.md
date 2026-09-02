@@ -67,7 +67,7 @@ The library's `Layout` receives the `router` and renders navbar/sidenav. Routes 
   let routeState: RouteState = $state(router.getState());
   router.addRouterListener(() => { routeState = router.getState() });
 
-  let currentUserId = $derived(routeState?.rotaParams?.id ? Number(routeState.rotaParams.id) : undefined);
+  let currentUserId = $derived(routeState?.routeParams?.id ? Number(routeState.routeParams.id) : undefined);
 </script>
 
 <Layout {router}>
@@ -127,6 +127,10 @@ The library's `Layout` receives the `router` and renders navbar/sidenav. Routes 
 | `delete`  | Data + confirmation message            | Delete / Cancel  |
 
 ```svelte
+<script lang="ts">
+  import { Button } from "@edujed/jedsvelted-ui/ui";
+</script>
+
 <DetailShell item={user} mode={action} entityName="User" {onClose}>
   {#snippet children(shell, isMode)}
     {#if isMode("detail")}
@@ -137,14 +141,14 @@ The library's `Layout` receives the `router` and renders navbar/sidenav. Routes 
       <Panel title={user?.id ? "Edit user" : "New user"} iconName="edit">
         <EditField label="Login" bind:value={formLogin} />
         <SelectField label="Role" bind:value={formRole} options={RoleList} />
-        <button onclick={handleSave}>Save</button>
-        <button onclick={shell.onCancel}>Cancel</button>
+        <Button variant="primary" icon="check" onclick={handleSave}>Save</Button>
+        <Button variant="secondary" icon="x" onclick={shell.onCancel}>Cancel</Button>
       </Panel>
     {:else if isMode("delete")}
       <Panel title="Delete user" iconName="trash">
         <!-- data + confirmation -->
-        <button onclick={handleDelete}>Delete</button>
-        <button onclick={shell.onCancel}>Cancel</button>
+        <Button variant="danger" icon="trash" onclick={handleDelete}>Delete</Button>
+        <Button variant="secondary" icon="x" onclick={shell.onCancel}>Cancel</Button>
       </Panel>
     {/if}
   {/snippet}
@@ -180,6 +184,7 @@ $effect(() => {
 - [x] Route navigation (`#/users/3` → panel opens with user 3)
 - [x] Close panel via chevron or Cancel
 - [x] Themes (light/dark) via `initTheme()`
+- [x] Centralized `Button` component (variants + icons from the library's icon registry)
 
 ## 🛠 Local development
 

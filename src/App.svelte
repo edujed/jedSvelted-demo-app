@@ -23,7 +23,7 @@
 			title: "Home",
 			icon: "🏠",
 			showInMenu: false,
-		}, // redireciona a /
+		}, // redirects to /
 		{
 			pattern: "/users",
 			moduleName: "users",
@@ -37,17 +37,17 @@
 			title: "User by id",
 			icon: "👤",
 			showInMenu: false,
-		}, // item interno
+		}, // internal item
 		{
 			pattern: "/users/:id/*",
 			moduleName: "users",
 			title: "User by id",
 			icon: "👤",
 			showInMenu: false,
-		}, // sub-páginas internas
+		}, // internal sub-pages
 	];
 
-	// Registra todas as rotas com seus metadados completos no router interno.
+	// Registers all routes with their full metadata in the internal router.
 	const router = new HashRouter();
 	for (const r of routes) {
 		router.add(r.pattern, () => {}, {

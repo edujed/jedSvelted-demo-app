@@ -67,7 +67,7 @@ O `Layout` da lib recebe o `router` e renderiza navbar/sidenav. As rotas são re
   let routeState: RouteState = $state(router.getState());
   router.addRouterListener(() => { routeState = router.getState() });
 
-  let currentUserId = $derived(routeState?.rotaParams?.id ? Number(routeState.rotaParams.id) : undefined);
+  let currentUserId = $derived(routeState?.routeParams?.id ? Number(routeState.routeParams.id) : undefined);
 </script>
 
 <Layout {router}>

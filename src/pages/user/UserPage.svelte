@@ -19,22 +19,22 @@
 		autoOpenId = $bindable(0),
 		role = $bindable("-"),
 	}: {
-		/** ID do registro para abrir automaticamente ao montar/navegar. */
+		/** Record ID to open automatically on mount/navigation. */
 		autoOpenId?: number | undefined;
-		/** Callback opcional — dispara quando o filho quer abrir o painel lateral. */
+		/** Role filter (bound to the filter SelectField). */
 		role: string;
 	} = $props();
 
-	// Estado reativo com tipo explícito para evitar inferência 'never[]'.
+	// Reactive state with explicit type to avoid 'never[]' inference.
 	let filteredUsers = $state<User[]>([]);
 
-	// Rastreia o último autoOpenId processado para evitar fechar o painel
-	// quando o pageShell reference muda (bind:this) mas o autoOpenId não mudou.
+	// Tracks the last processed autoOpenId to avoid closing the panel
+	// when the pageShell reference changes (bind:this) but autoOpenId did not.
 	let lastAutoOpenId = $state<number | undefined>(undefined);
 
 	$effect(() => {
 		if (!pageShell) return;
-		// Só age quando o autoOpenId muda (não quando o pageShell muda)
+		// Only acts when autoOpenId changes (not when pageShell changes)
 		if (autoOpenId === lastAutoOpenId) return;
 		lastAutoOpenId = autoOpenId;
 
@@ -44,17 +44,17 @@
 				pageShell.showDetail(users[0] as unknown as Record<string, unknown>);
 			}
 		} else if (lastAutoOpenId && lastAutoOpenId > 0) {
-			// Só fecha quando saímos de uma rota /users/:id (ex: /users/3 → /users).
-			// No mount inicial (autoOpenId=0) não fecha — evita fechar um painel
-			// que foi aberto via ação da tabela.
+			// Only closes when leaving a /users/:id route (e.g.: /users/3 → /users).
+			// On initial mount (autoOpenId=0) it does not close — avoids closing a panel
+			// that was opened via a table action.
 			pageShell.closeDetail();
 		}
 	});
 
-	// Handlers para save/delete vindos do UserDetail
+	// Handlers for save/delete coming from UserDetail
 	const handleSave = (updated: User) => {
 		console.log("[UserPage] Save", updated);
-		// Atualiza a lista local
+		// Updates the local list
 		if (updated.id) {
 			const idx = filteredUsers.findIndex((u) => u.id === updated.id);
 			if (idx >= 0) filteredUsers[idx] = updated;
@@ -84,7 +84,7 @@
 		filteredUsers = [];
 	};
 
-	// Colunas da tabela
+	// Table columns
 	const colunas: TableCol[] = [
 		{ key: "id", title: "ID", align: "right", sortable: true, filterable: true },
 		{ key: "role", title: "Role", align: "center", sortable: true, filterable: false },

@@ -3,6 +3,7 @@
 	import { EditField } from "@edujed/jedsvelted-ui/forms";
 	import { SelectField } from "@edujed/jedsvelted-ui/forms";
 	import { Panel } from "@edujed/jedsvelted-ui/container";
+	import { Button } from "@edujed/jedsvelted-ui/ui";
 	import {
 		RoleList,
 		type User,
@@ -30,7 +31,7 @@
 		onDelete?: (user: User) => void;
 	} = $props();
 
-	// Form state — sincronizado com o user prop via $effect
+	// Form state — synced with the user prop via $effect
 	let formLogin = $state("");
 	let formName = $state("");
 	let formDepartment = $state("");
@@ -76,7 +77,7 @@
 >
 	{#snippet children(shell, isMode)}
 		{@const cancel = () => shell.onCancel()}
-		<!-- Modo Consulta -->
+		<!-- View mode -->
 		{#if isMode("detail")}
 			<Panel title="Basic info" iconName="user">
 				<div class="detail-grid">
@@ -110,7 +111,7 @@
 			</Panel>
 		{/if}
 
-		<!-- Modo Edição -->
+		<!-- Edit mode -->
 		{#if isMode("edit")}
 			<Panel title={user?.id ? "Edit user" : "New user"} iconName="edit">
 				<div class="form-grid">
@@ -157,17 +158,13 @@
 					/>
 				</div>
 				<div class="form-actions">
-					<button class="btn btn-primary" onclick={handleSave}>
-						Save
-					</button>
-					<button class="btn btn-secondary" onclick={cancel}>
-						Cancel
-					</button>
+					<Button variant="primary" icon="check" onclick={handleSave}>Save</Button>
+					<Button variant="secondary" icon="x" onclick={cancel}>Cancel</Button>
 				</div>
 			</Panel>
 		{/if}
 
-		<!-- Modo Exclusão -->
+		<!-- Delete mode -->
 		{#if isMode("delete")}
 			<Panel title="Delete user" iconName="trash">
 				<div class="detail-grid">
@@ -207,12 +204,8 @@
 					This action cannot be undone.
 				</p>
 				<div class="form-actions">
-					<button class="btn btn-danger" onclick={handleDelete}>
-						Delete
-					</button>
-					<button class="btn btn-secondary" onclick={cancel}>
-						Cancel
-					</button>
+					<Button variant="danger" icon="trash" onclick={handleDelete}>Delete</Button>
+					<Button variant="secondary" icon="x" onclick={cancel}>Cancel</Button>
 				</div>
 			</Panel>
 		{/if}
@@ -257,46 +250,6 @@
 		margin-top: 1.5rem;
 		padding-top: 1rem;
 		border-top: 1px solid var(--border);
-	}
-
-	.btn {
-		padding: 0.5rem 1rem;
-		border-radius: var(--radius-sm);
-		font-size: var(--font-size-sm);
-		font-weight: 500;
-		cursor: pointer;
-		border: 1px solid transparent;
-		transition: all var(--transition-fast);
-	}
-
-	.btn-primary {
-		background: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-
-	.btn-primary:hover {
-		background: var(--color-primary-light);
-	}
-
-	.btn-secondary {
-		background: transparent;
-		color: var(--color-on-surface);
-		border-color: var(--color-border);
-	}
-
-	.btn-secondary:hover {
-		background: var(--color-surface-hover, rgba(0, 0, 0, 0.05));
-	}
-
-	.btn-danger {
-		background: var(--color-error);
-		color: white;
-		border-color: var(--color-error);
-	}
-
-	.btn-danger:hover {
-		opacity: 0.9;
 	}
 
 	.delete-message {
