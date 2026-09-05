@@ -201,7 +201,8 @@ npm run preview
 
 ## for a Live Demo:
 
-To open a Live Demo, click here: [![Live Demo](https://shields.io)](https://raw.githubusercontent.com/edujed/jedSvelted-demo-app/refs/heads/gh-pages/index.html)
+Aplicação de demonstração para a biblioteca
+[![Live Demo](https://shields.io)](https://edujed.github.io/jedSvelted-demo-app/)
 
 ## 📄 License
 
