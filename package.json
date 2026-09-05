@@ -19,6 +19,6 @@
     "vite": "^8.2.0"
   },
   "dependencies": {
-  	"@edujed/jedsvelted-ui": "0.0.1-alpha.3"
+  	"@edujed/jedsvelted-ui": "0.0.1-alpha.4"
 }
 }

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { RouteState } from "@edujed/jedsvelted-ui/router";
 	import { initTheme } from "@edujed/jedsvelted-ui/theme";
+	import { initI18n } from "@edujed/jedsvelted-ui/i18n";
+	import { t } from "./i18n";
 	import { ToastContainer } from "@edujed/jedsvelted-ui/info";
 	import { Layout } from "@edujed/jedsvelted-ui/container";
 	import { HashRouter } from "@edujed/jedsvelted-ui/router";
@@ -8,40 +10,43 @@
 	import UserPage from "./pages/user/UserPage.svelte";
 
 	initTheme();
+	initI18n();
 
+	// Routes — titles are getters so they re-resolve on locale change.
+	// The lib's Navbar/Sidenav resolves them at read time (reactive).
 	const routes = [
 		{
 			pattern: "/",
 			moduleName: "home",
-			title: "Home",
+			title: () => t('home'),
 			icon: "🏠",
 			showInMenu: true,
 		},
 		{
 			pattern: "/home",
 			moduleName: "home",
-			title: "Home",
+			title: () => t('home'),
 			icon: "🏠",
 			showInMenu: false,
 		}, // redirects to /
 		{
 			pattern: "/users",
 			moduleName: "users",
-			title: "Users",
+			title: () => t('users'),
 			icon: "👥",
 			showInMenu: true,
 		},
 		{
 			pattern: "/users/:id",
 			moduleName: "users",
-			title: "User by id",
+			title: () => t('user'),
 			icon: "👤",
 			showInMenu: false,
 		}, // internal item
 		{
 			pattern: "/users/:id/*",
 			moduleName: "users",
-			title: "User by id",
+			title: () => t('user'),
 			icon: "👤",
 			showInMenu: false,
 		}, // internal sub-pages

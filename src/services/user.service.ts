@@ -1,11 +1,11 @@
 
-// Role configuration
+// Role configuration — labels are i18n keys resolved by the UI (see getRoleOptions).
 export const RoleList = [
-  { key: "-", label: "[no filter]" },
-  { key: "A", label: "Admin" },
-  { key: "M", label: "Manager" },
-  { key: "U", label: "User" },
-  { key: "X", label: "External/Restrict" }
+  { key: "-", label: "noFilter" },
+  { key: "A", label: "admin" },
+  { key: "M", label: "manager" },
+  { key: "U", label: "user" },
+  { key: "X", label: "external" }
 ];
 
 export type UserRole = '-' | 'A' | 'M' | 'U' | 'X';

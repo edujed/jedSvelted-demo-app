@@ -5,12 +5,12 @@ export default defineConfig({
   plugins: [svelte()],
   server: {
     fs: {
-      // Permite que o Vite acesse arquivos fora da pasta demo-app (a lib vizinha)
+      // Allow Vite to access files outside the demo-app folder (the neighboring lib)
       allow: ['..']
     }
   },
   optimizeDeps: {
-    // Força o Vite a processar a sua biblioteca local corretamente
+    // Force Vite to process the local library correctly
     exclude: ['@edujed/jedsvelted-ui']
   }
 });

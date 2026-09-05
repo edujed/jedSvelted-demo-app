@@ -13,12 +13,16 @@
 	import type { ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import UserPermissions from "./UserPermissions.svelte"
     import { Tabs } from "@edujed/jedsvelted-ui/tabs";
+	import { localeStore } from "@edujed/jedsvelted-ui/i18n";
+	import { t } from "../../i18n";
 
-	const StatusList = [
-		{ key: "active", label: "Active" },
-		{ key: "inactive", label: "Inactive" },
-		{ key: "pending", label: "Pending" },
-	];
+	let locale = $derived($localeStore);
+
+	const StatusList = $derived([
+		{ key: "active", label: t('active', undefined, locale) },
+		{ key: "inactive", label: t('inactive', undefined, locale) },
+		{ key: "pending", label: t('pending', undefined, locale) },
+	]);
 
 	let {
 		user,
@@ -57,11 +61,11 @@
 	// Fields shared by the detail and delete modes (role resolved to its label).
 	const userFields = $derived([
 		{ label: "ID", value: user?.id },
-		{ label: "Login", value: user?.login },
-		{ label: "Name", value: user?.name },
-		{ label: "Role", value: RoleList.find((r) => r.key === user?.role)?.label ?? user?.role },
-		{ label: "Department", value: user?.department },
-		{ label: "Status", value: user?.status },
+		{ label: t('login', undefined, locale), value: user?.login },
+		{ label: t('name', undefined, locale), value: user?.name },
+		{ label: t('role', undefined, locale), value: RoleList.find((r) => r.key === user?.role) ? t(RoleList.find((r) => r.key === user?.role)!.label as never, undefined, locale) : user?.role },
+		{ label: t('department', undefined, locale), value: user?.department },
+		{ label: t('status', undefined, locale), value: user?.status },
 	]);
 
 	function handleSave() {
@@ -86,23 +90,23 @@
 <DetailShell
 	item={user as unknown as Record<string, unknown> | undefined}
 	mode={action}
-	entityName="User"
+	entityName={t('user', undefined, locale)}
 	{onClose}
 >
 	{#snippet children(shell, isMode)}
 		{@const cancel = () => shell.onCancel()}
 		<!-- View mode -->
 		{#if isMode("detail")}
-			<Panel title="Basic info" iconName="user">
+			<Panel title={t('basicInfo', undefined, locale)} iconName="user">
 				<InfoGrid items={userFields} />
 			</Panel>
 
    <div class="detail-section">
-          <h3 class="section-title">Related Records</h3>
+          <h3 class="section-title">{t('relatedRecords', undefined, locale)}</h3>
           <Tabs
             tabs={[
-              { value: 'permissions', label: 'Permissions' },
-              { value: 'profiles', label: 'Profiles' }
+              { value: 'permissions', label: t('permissions', undefined, locale) },
+              { value: 'profiles', label: t('profiles', undefined, locale) }
             ]}
             activeTab={currentTab}
           >
@@ -113,7 +117,7 @@
                   inline
                 />
               {:else if tabValue === 'profiles'}
-                <p class="empty-hint">No profiles assigned to this user.</p>
+                <p class="empty-hint">{t('noProfiles', undefined, locale)}</p>
               {/if}
             {/snippet}
           </Tabs>
@@ -122,12 +126,12 @@
 
 		<!-- Edit mode -->
 		{#if isMode("edit")}
-			<Panel title={user?.id ? "Edit user" : "New user"} iconName="edit">
+			<Panel title={user?.id ? t('editUserTitle', undefined, locale) : t('newUser', undefined, locale)} iconName="edit">
 				<div class="form-grid">
 					<EditField
 						id="user-edit-login"
-						label="Login"
-						hint="Unique login name"
+						label={t('login', undefined, locale)}
+						hint={t('uniqueLoginHint', undefined, locale)}
 						type="text"
 						placeholder="e.g. joao_dev"
 						bind:value={formLogin}
@@ -135,31 +139,31 @@
 					/>
 					<EditField
 						id="user-edit-name"
-						label="Name"
-						hint="Full name"
+						label={t('name', undefined, locale)}
+						hint={t('fullNameHint', undefined, locale)}
 						type="text"
 						placeholder="e.g. João Pereira"
 						bind:value={formName}
 						colSpan={2}
 					/>
 					<SelectField
-						label="Role"
-						hint="User role"
+						label={t('role', undefined, locale)}
+						hint={t('userRoleHint', undefined, locale)}
 						bind:value={formRole}
-						options={RoleList.filter((r) => r.key !== "-")}
+						options={RoleList.filter((r) => r.key !== "-").map((r) => ({ key: r.key, label: t(r.label as never, undefined, locale) }))}
 						colSpan={1}
 					/>
 					<SelectField
-						label="Status"
-						hint="Account status"
+						label={t('status', undefined, locale)}
+						hint={t('accountStatusHint', undefined, locale)}
 						bind:value={formStatus}
 						options={StatusList}
 						colSpan={1}
 					/>
 					<EditField
 						id="user-edit-department"
-						label="Department"
-						hint="Department name"
+						label={t('department', undefined, locale)}
+						hint={t('departmentHint', undefined, locale)}
 						type="text"
 						placeholder="e.g. Engineering"
 						bind:value={formDepartment}
@@ -167,27 +171,27 @@
 					/>
 				</div>
 				<div class="form-actions">
-					<Button variant="primary" icon="check" onclick={handleSave}>Save</Button>
-					<Button variant="secondary" icon="x" onclick={cancel}>Cancel</Button>
+					<Button variant="primary" icon="check" onclick={handleSave}>{t('save', undefined, locale)}</Button>
+					<Button variant="secondary" icon="x" onclick={cancel}>{t('cancel', undefined, locale)}</Button>
 				</div>
 			</Panel>
 		{/if}
 
 		<!-- Delete mode -->
 		{#if isMode("delete")}
-			<Panel title="Delete user" iconName="trash">
+			<Panel title={t('deleteUserTitle', undefined, locale)} iconName="trash">
 				<InfoGrid items={userFields} />
 				<p class="delete-message">
-					Are you sure you want to delete
-					<strong>{user?.name ?? "this user"}</strong>
+					{t('deleteUserMessage', undefined, locale)}
+					<strong>{user?.name ?? t('thisUser', undefined, locale)}</strong>
 					{#if user?.login}
 					(<code>{user.login}</code>)
 					{/if}?
-					This action cannot be undone.
+					{t('deleteWarning', undefined, locale)}
 				</p>
 				<div class="form-actions">
-					<Button variant="danger" icon="trash" onclick={handleDelete}>Delete</Button>
-					<Button variant="secondary" icon="x" onclick={cancel}>Cancel</Button>
+					<Button variant="danger" icon="trash" onclick={handleDelete}>{t('delete', undefined, locale)}</Button>
+					<Button variant="secondary" icon="x" onclick={cancel}>{t('cancel', undefined, locale)}</Button>
 				</div>
 			</Panel>
 		{/if}

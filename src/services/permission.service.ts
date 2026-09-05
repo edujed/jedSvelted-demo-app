@@ -9,54 +9,56 @@ export interface Permission {
 }
 
 // Available modules in the hypothetical access-control system.
+// Labels are i18n keys resolved by the UI (see getModuleOptions).
 export const ModuleList = [
-	{ key: "users", label: "Users" },
-	{ key: "orders", label: "Orders" },
-	{ key: "products", label: "Products" },
-	{ key: "reports", label: "Reports" },
-	{ key: "settings", label: "Settings" },
+	{ key: "users", label: "users" },
+	{ key: "orders", label: "orders" },
+	{ key: "products", label: "products" },
+	{ key: "reports", label: "reports" },
+	{ key: "settings", label: "settings" },
 ];
 
 export type PermissionModule = (typeof ModuleList)[number]["key"];
 
-// Available actions per module.
+// Available actions per module — labels are i18n keys resolved by the UI.
 export const ActionList: Record<PermissionModule, { key: string; label: string }[]> = {
 	users: [
-		{ key: "view", label: "View" },
-		{ key: "create", label: "Create" },
-		{ key: "edit", label: "Edit" },
-		{ key: "delete", label: "Delete" },
+		{ key: "view", label: "view" },
+		{ key: "create", label: "create" },
+		{ key: "edit", label: "edit" },
+		{ key: "delete", label: "delete" },
 	],
 	orders: [
-		{ key: "view", label: "View" },
-		{ key: "create", label: "Create" },
-		{ key: "edit", label: "Edit" },
-		{ key: "cancel", label: "Cancel" },
+		{ key: "view", label: "view" },
+		{ key: "create", label: "create" },
+		{ key: "edit", label: "edit" },
+		{ key: "cancel", label: "cancel" },
 	],
 	products: [
-		{ key: "view", label: "View" },
-		{ key: "create", label: "Create" },
-		{ key: "edit", label: "Edit" },
-		{ key: "delete", label: "Delete" },
+		{ key: "view", label: "view" },
+		{ key: "create", label: "create" },
+		{ key: "edit", label: "edit" },
+		{ key: "delete", label: "delete" },
 	],
 	reports: [
-		{ key: "view", label: "View" },
-		{ key: "export", label: "Export" },
+		{ key: "view", label: "view" },
+		{ key: "export", label: "export" },
 	],
 	settings: [
-		{ key: "view", label: "View" },
-		{ key: "edit", label: "Edit" },
+		{ key: "view", label: "view" },
+		{ key: "edit", label: "edit" },
 	],
 };
 
 // Seed data: a few permissions per user (mocked).
+// Descriptions are i18n keys resolved by the UI (see getPermissionsByUser).
 const seedPermissions: Permission[] = [
-	{ id: 1, id_user: 1, module: "users", action: "view", description: "View all users" },
-	{ id: 2, id_user: 1, module: "users", action: "edit", description: "Edit user profiles" },
-	{ id: 3, id_user: 1, module: "orders", action: "view", description: "View all orders" },
-	{ id: 4, id_user: 1, module: "reports", action: "export", description: "Export reports to CSV" },
+	{ id: 1, id_user: 1, module: "users", action: "view", description: "viewAllUsers" },
+	{ id: 2, id_user: 1, module: "users", action: "edit", description: "editUserProfiles" },
+	{ id: 3, id_user: 1, module: "orders", action: "view", description: "viewAllOrders" },
+	{ id: 4, id_user: 1, module: "reports", action: "export", description: "exportReportsCsv" },
 	{ id: 5, id_user: 2, module: "users", action: "view" },
-	{ id: 6, id_user: 2, module: "settings", action: "edit", description: "Change system settings" },
+	{ id: 6, id_user: 2, module: "settings", action: "edit", description: "changeSystemSettings" },
 	{ id: 7, id_user: 3, module: "orders", action: "view" },
 	{ id: 8, id_user: 3, module: "orders", action: "cancel" },
 	{ id: 9, id_user: 4, module: "products", action: "view" },

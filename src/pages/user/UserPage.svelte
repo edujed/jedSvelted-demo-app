@@ -14,6 +14,10 @@
 	import { Table, type TableCol } from "@edujed/jedsvelted-ui/table";
 	import { createHandleDetail, type ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import { toast } from "@edujed/jedsvelted-ui/info";
+	import { localeStore } from "@edujed/jedsvelted-ui/i18n";
+	import { t } from "../../i18n";
+
+	let locale = $derived($localeStore);
 
 	let pageShell: { showDetail: (row: Record<string, unknown>) => void; closeDetail: () => void } | undefined = $state(undefined);
 
@@ -69,7 +73,7 @@
 	const { handleDetailAction } = createHandleDetail<User>({
 		dataRef: { data: UserList },
 		toast,
-		itemName: "User",
+		itemName: () => t('user', undefined, locale),
 		displayFields: ["name"],
 	});
 
@@ -79,37 +83,37 @@
 		pageShell?.closeDetail();
 	};
 
-	// Table columns
-	const colunas: TableCol[] = [
+	// Table columns (reactive — recomputed when locale changes)
+	const colunas: TableCol[] = $derived([
 		{ key: "id", title: "ID", align: "right", sortable: true, filterable: true },
-		{ key: "role", title: "Role", align: "center", sortable: true, filterable: false },
-		{ key: "login", title: "Login", align: "left", sortable: true, filterable: true },
-		{ key: "name", title: "Name", align: "left", sortable: true, filterable: true },
-		{ key: "department", title: "Department", align: "left", sortable: true, filterable: true },
-		{ key: "status", title: "Status", align: "left", sortable: false, filterable: false },
-	];
+		{ key: "role", title: t('role', undefined, locale), align: "center", sortable: true, filterable: false },
+		{ key: "login", title: t('login', undefined, locale), align: "left", sortable: true, filterable: true },
+		{ key: "name", title: t('name', undefined, locale), align: "left", sortable: true, filterable: true },
+		{ key: "department", title: t('department', undefined, locale), align: "left", sortable: true, filterable: true },
+		{ key: "status", title: t('status', undefined, locale), align: "left", sortable: false, filterable: false },
+	]);
 </script>
 
 <PageShell
     bind:this={pageShell}
-	title="User"
+	title={t('user', undefined, locale)}
 	onSearch={handleSearch}
 	onClear={handleClear}
 >
 	{#snippet filter(pageState)}
 		<SelectField
-			label="Role"
-			hint="Filter by user role"
+			label={t('role', undefined, locale)}
+			hint={t('filterByRole', undefined, locale)}
 			bind:value={role}
-			options={RoleList.map((r) => ({ ...r }))}
+			options={RoleList.map((r) => ({ key: r.key, label: t(r.label as never, undefined, locale) }))}
 			colSpan={1}
 		/>
 		<EditField
 			id="user-search-input"
-			label="Search"
-			hint="Type to filter by name or login"
+			label={t('search', undefined, locale)}
+			hint={t('searchHint', undefined, locale)}
 			type="text"
-			placeholder="Search by name or login..."
+			placeholder={t('searchPlaceholder', undefined, locale)}
 			bind:value={searchTerm}
 			colSpan={2}
 		/>
@@ -118,27 +122,27 @@
 	{#snippet content(shell)}
 		<Table
 			id="tblUsers"
-			caption={`Users`}
+			caption={t('users', undefined, locale)}
 			data={filteredUsers as unknown as Record<string, unknown>[]}
 			rowKey="id"
 			csvFileName="users.csv"
 			columns={colunas}
 			actions={[
 				{
-					title: "View",
-					hint: "View user details",
+					title: t('view', undefined, locale),
+					hint: t('viewUserDetails', undefined, locale),
 					icon: "eye",
 					onClick: (row) => shell.show(row),
 				},
 				{
-					title: "Edit",
-					hint: "Edit user",
+					title: t('edit', undefined, locale),
+					hint: t('editUser', undefined, locale),
 					icon: "edit",
 					onClick: (row) => shell.edit(row),
 				},
 				{
-					title: "Delete",
-					hint: "Delete user",
+					title: t('delete', undefined, locale),
+					hint: t('deleteUser', undefined, locale),
 					icon: "trash",
 					onClick: (row) => shell.deleteRow(row),
 				},

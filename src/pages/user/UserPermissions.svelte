@@ -6,6 +6,10 @@
 	import { toast } from "@edujed/jedsvelted-ui/info";
 	import { createHandleDetail, type ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import type { TableCol } from "@edujed/jedsvelted-ui/table";
+	import { localeStore } from "@edujed/jedsvelted-ui/i18n";
+	import { t } from "../../i18n";
+
+	let locale = $derived($localeStore);
 	import type { Snippet } from 'svelte';
 	import {
 		ModuleList,
@@ -35,7 +39,7 @@
 	const { handleDetailAction } = createHandleDetail<Permission>({
 		dataRef: { data: permissions },
 		toast,
-		itemName: "Permission",
+		itemName: () => t('permissions', undefined, locale),
 		displayFields: ["module", "action"],
 	});
 
@@ -44,7 +48,11 @@
 	$effect(() => {
 		permissions.splice(0, permissions.length);
 		getPermissionsByUser(id).then((result) => {
-			permissions.splice(0, permissions.length, ...result);
+			// Translate description keys for the current locale
+			const translated = result.map((p) =>
+				p.description ? { ...p, description: t(p.description as never, undefined, locale) } : p
+			);
+			permissions.splice(0, permissions.length, ...translated);
 		});
 	});
 
@@ -55,14 +63,14 @@
 	let editRow: Permission | null = $state(null);
 
 	const actionOptions = $derived(
-		formModule ? ActionList[formModule] : []
+		formModule ? ActionList[formModule].map((a) => ({ key: a.key, label: t(a.label as never, undefined, locale) })) : []
 	);
 
-	const columns: TableCol[] = [
-		{ key: "module", title: "Module", align: "left" as const, sortable: true, filterable: true },
-		{ key: "action", title: "Action", align: "left" as const, sortable: true, filterable: true },
-		{ key: "description", title: "Description", align: "left" as const, sortable: false, filterable: true },
-	];
+	const columns: TableCol[] = $derived([
+		{ key: "module", title: t('module', undefined, locale), align: "left" as const, sortable: true, filterable: true },
+		{ key: "action", title: t('action', undefined, locale), align: "left" as const, sortable: true, filterable: true },
+		{ key: "description", title: t('description', undefined, locale), align: "left" as const, sortable: false, filterable: true },
+	]);
 
 	function handleEdit(...args: unknown[]): void {
 		const row = args[0] as unknown as Permission;
@@ -74,11 +82,11 @@
 
 	function handleSave(onComplete?: () => void): void {
 		if (!formModule) {
-			toast.error("Module is required");
+			toast.error(t('moduleRequired', undefined, locale));
 			return;
 		}
 		if (!formAction) {
-			toast.error("Action is required");
+			toast.error(t('actionRequired', undefined, locale));
 			return;
 		}
 
@@ -114,23 +122,22 @@
 {#snippet viewContent(row: Record<string, unknown>)}
 	<div class="view-fields">
 		<div class="view-row">
-			<span class="view-label">Module</span>
+			<span class="view-label">{t('module', undefined, locale)}</span>
 			<span class="view-value">{row.module}</span>
 		</div>
 		<div class="view-row">
-			<span class="view-label">Action</span>
+			<span class="view-label">{t('action', undefined, locale)}</span>
 			<span class="view-value">{row.action}</span>
 		</div>
 		<div class="view-row">
-			<span class="view-label">Description</span>
+			<span class="view-label">{t('description', undefined, locale)}</span>
 			<span class="view-value">{row.description || '—'}</span>
 		</div>
 	</div>
 {/snippet}
 
 <CrudPanel
-	title="Permissions"
-	addLabel="Add permission"
+	title={t('permissions', undefined, locale)}
 	csvFileName="permissions.csv"
 	{inline}
 	{columns}
@@ -143,25 +150,25 @@
 	{#snippet renderForm(onComplete)}
 		<div class="form-fields">
 			<SelectField
-				label="Module"
-				hint="Module the permission applies to"
+				label={t('module', undefined, locale)}
+				hint={t('moduleHint', undefined, locale)}
 				bind:value={formModule}
-				options={ModuleList}
+				options={ModuleList.map((m) => ({ key: m.key, label: t(m.label as never, undefined, locale) }))}
 				colSpan={2}
 			/>
 			<SelectField
-				label="Action"
-				hint="Action allowed on the module"
+				label={t('action', undefined, locale)}
+				hint={t('actionHint', undefined, locale)}
 				bind:value={formAction}
 				options={actionOptions}
 				colSpan={2}
 			/>
 			<EditField
 				id="perm-description"
-				label="Description"
-				hint="Optional description"
+				label={t('description', undefined, locale)}
+				hint={t('descriptionHint', undefined, locale)}
 				type="text"
-				placeholder="e.g. View all orders"
+				placeholder={t('descriptionPlaceholder', undefined, locale)}
 				bind:value={formDescription}
 				colSpan={4}
 			/>
@@ -169,8 +176,8 @@
 		<FormActions
 			onSave={() => handleSave(onComplete)}
 			onCancel={() => { resetForm(); onComplete(); }}
-			saveLabel="Save"
-			cancelLabel="Cancel"
+			saveLabel={t('save', undefined, locale)}
+			cancelLabel={t('cancel', undefined, locale)}
 		/>
 	{/snippet}
 </CrudPanel>
