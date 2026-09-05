@@ -199,6 +199,10 @@ npm run build
 npm run preview
 ```
 
+## for a Live Demo:
+
+To open a Live Demo, click here: [![Live Demo](https://shields.io)](https://raw.githubusercontent.com/edujed/jedSvelted-demo-app/refs/heads/gh-pages/index.html)
+
 ## 📄 License
 
 [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html)
