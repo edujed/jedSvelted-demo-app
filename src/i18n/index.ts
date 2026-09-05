@@ -17,10 +17,14 @@
  * the component re-renders and `t()` is called again with the new locale.
  */
 
-import { get } from 'svelte/store';
-import { localeStore, t as libT, type Locale } from '@edujed/jedsvelted-ui/i18n';
-import en from './locales/en';
-import ptBR from './locales/pt-BR';
+import { get } from "svelte/store";
+import {
+  localeStore,
+  t as libT,
+  type Locale,
+} from "@edujed/jedsvelted-ui/i18n";
+import en from "./locales/en";
+import ptBR from "./locales/pt-BR";
 
 /** Message keys specific to this demo app. */
 export type DemoMessageKey = keyof typeof en;
@@ -28,7 +32,7 @@ export type DemoMessageKey = keyof typeof en;
 /** Shape every demo locale must satisfy. */
 export type DemoMessages = Record<DemoMessageKey, string>;
 
-const DEMO_LOCALES: Record<Locale, DemoMessages> = { en, 'pt-BR': ptBR };
+const DEMO_LOCALES: Record<Locale, DemoMessages> = { en, "pt-BR": ptBR };
 
 /**
  * Translates a message key for the given locale.
@@ -40,20 +44,22 @@ const DEMO_LOCALES: Record<Locale, DemoMessages> = { en, 'pt-BR': ptBR };
  * @param locale - Optional locale (defaults to current localeStore value)
  */
 export function t(
-	key: DemoMessageKey | Parameters<typeof libT>[0],
-	params?: Record<string, string | number>,
-	locale?: Locale
+  key: DemoMessageKey | Parameters<typeof libT>[0],
+  params?: Record<string, string | number>,
+  locale?: Locale,
 ): string {
-	const currentLocale = locale ?? get(localeStore);
-	const demoTemplate = (DEMO_LOCALES[currentLocale] as Record<string, string>)[key as string];
+  const currentLocale = locale ?? get(localeStore);
+  const demoTemplate = (DEMO_LOCALES[currentLocale] as Record<string, string>)[
+    key as string
+  ];
 
-	if (demoTemplate !== undefined) {
-		if (!params) return demoTemplate;
-		return demoTemplate.replace(/\{(\w+)\}/g, (match, name: string) =>
-			name in params ? String(params[name]) : match
-		);
-	}
+  if (demoTemplate !== undefined) {
+    if (!params) return demoTemplate;
+    return demoTemplate.replace(/\{(\w+)\}/g, (match, name: string) =>
+      name in params ? String(params[name]) : match,
+    );
+  }
 
-	// Fall through to the lib's generic messages
-	return libT(key as Parameters<typeof libT>[0], params);
+  // Fall through to the lib's generic messages
+  return libT(key as Parameters<typeof libT>[0], params);
 }

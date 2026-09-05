@@ -120,11 +120,11 @@ O `Layout` da lib recebe o `router` e renderiza navbar/sidenav. As rotas são re
 
 `DetailShell` gerencia o estado do painel (modo, item selecionado, form). O conteúdo muda conforme o `action`:
 
-| Modo      | Exibido                              | Ações          |
-| --------- | ------------------------------------ | -------------- |
-| `detail`  | Grid de dados (somente leitura)      | —              |
-| `edit`    | Formulário com `EditField`/`SelectField` | Save / Cancel |
-| `delete`  | Dados + mensagem de confirmação      | Delete / Cancel|
+| Modo     | Exibido                                  | Ações           |
+| -------- | ---------------------------------------- | --------------- |
+| `detail` | Grid de dados (somente leitura)          | —               |
+| `edit`   | Formulário com `EditField`/`SelectField` | Save / Cancel   |
+| `delete` | Dados + mensagem de confirmação          | Delete / Cancel |
 
 ```svelte
 <DetailShell item={user} mode={action} entityName="User" {onClose}>

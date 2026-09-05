@@ -1,18 +1,13 @@
 <script lang="ts">
-	import { SelectField } from "@edujed/jedsvelted-ui/forms";
 	import { EditField } from "@edujed/jedsvelted-ui/forms";
 	import { PageShell } from "@edujed/jedsvelted-ui/pages";
-	import UserDetail from "./UserDetail.svelte";
+	import DepartmentDetail from "./DepartmentDetail.svelte";
 	import {
-		RoleList,
-		StatusFilterList,
-		UserList,
-		type User,
-		type UserRole,
-		type UserStatus,
-		filterUsers,
-		getUserById,
-	} from "../../services/user.service";
+		DepartmentList,
+		type Department,
+		filterDepartments,
+		getDepartmentById,
+	} from "../../services/department.service";
 	import { Table, type TableCol } from "@edujed/jedsvelted-ui/table";
 	import { createHandleDetail, type ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import { toast } from "@edujed/jedsvelted-ui/info";
@@ -25,19 +20,13 @@
 
 	let {
 		autoOpenId = $bindable(0),
-		role = $bindable("-"),
-		status = $bindable("active"),
 	}: {
 		/** Record ID to open automatically on mount/navigation. */
 		autoOpenId?: number | undefined;
-		/** Role filter (bound to the filter SelectField). */
-		role?: string;
-		/** Status filter (bound to the filter SelectField). */
-		status?: string;
 	} = $props();
 
 	// Reactive state with explicit type to avoid 'never[]' inference.
-	let filteredUsers = $state<User[]>([]);
+	let filteredDepartments = $state<Department[]>([]);
 
 	// Tracks the last processed autoOpenId to avoid closing the panel
 	// when the pageShell reference changes (bind:this) but autoOpenId did not.
@@ -50,46 +39,39 @@
 		lastAutoOpenId = autoOpenId;
 
 		if (autoOpenId && autoOpenId > 0) {
-			const users = getUserById(autoOpenId);
-			if (users.length > 0) {
-				pageShell.showDetail(users[0] as unknown as Record<string, unknown>);
+			const departments = getDepartmentById(autoOpenId);
+			if (departments.length > 0) {
+				pageShell.showDetail(departments[0] as unknown as Record<string, unknown>);
 			}
 		} else if (lastAutoOpenId && lastAutoOpenId > 0) {
-			// Only closes when leaving a /users/:id route (e.g.: /users/3 → /users).
+			// Only closes when leaving a /departments/:id route (e.g.: /departments/3 → /departments).
 			// On initial mount (autoOpenId=0) it does not close — avoids closing a panel
 			// that was opened via a table action.
 			pageShell.closeDetail();
 		}
 	});
 
-	// Translated status filter options — reactive to locale changes.
-	const statusOptions = $derived(
-		StatusFilterList.map((s) => ({ key: s.key, label: t(s.label as never, undefined, locale) }))
-	);
-
 	// Local state for search/filtering
 	let searchTerm = $state("");
 	const handleSearch = () => {
-		filteredUsers = filterUsers(UserList, searchTerm, role as UserRole, status as UserStatus);
+		filteredDepartments = filterDepartments(DepartmentList, searchTerm);
 	};
 	const handleClear = () => {
-		role = "-";
-		status = "-";
 		searchTerm = "";
-		filteredUsers = [];
+		filteredDepartments = [];
 	};
 
-	// Unified CRUD handler — mutates the source list (UserList) and fires the
+	// Unified CRUD handler — mutates the source list (DepartmentList) and fires the
 	// standardized toast. The page is the single owner of data + notification.
-	const { handleDetailAction } = createHandleDetail<User>({
-		dataRef: { data: UserList },
+	const { handleDetailAction } = createHandleDetail<Department>({
+		dataRef: { data: DepartmentList },
 		toast,
-		itemName: () => t('user', undefined, locale),
+		itemName: () => t('department', undefined, locale),
 		displayFields: ["name"],
 	});
 
-	// Single event contract from UserDetail: (action, item).
-	const handleUserAction = (action: ActionEvent, item: User) => {
+	// Single event contract from DepartmentDetail: (action, item).
+	const handleDepartmentAction = (action: ActionEvent, item: Department) => {
 		handleDetailAction(action, item);
 		pageShell?.closeDetail();
 	};
@@ -97,37 +79,23 @@
 	// Table columns (reactive — recomputed when locale changes)
 	const colunas: TableCol[] = $derived([
 		{ key: "id", title: "ID", align: "right", sortable: true, filterable: true },
-		{ key: "role", title: t('role', undefined, locale), align: "center", sortable: true, filterable: false },
-		{ key: "login", title: t('login', undefined, locale), align: "left", sortable: true, filterable: true },
 		{ key: "name", title: t('name', undefined, locale), align: "left", sortable: true, filterable: true },
-		{ key: "department", title: t('department', undefined, locale), align: "left", sortable: true, filterable: true },
-		{ key: "status", title: t('status', undefined, locale), align: "left", sortable: false, filterable: false },
+		{ key: "code", title: t('code', undefined, locale), align: "center", sortable: true, filterable: true },
+		{ key: "location", title: t('location', undefined, locale), align: "left", sortable: true, filterable: true },
+		{ key: "manager", title: t('manager', undefined, locale), align: "left", sortable: true, filterable: true },
+		{ key: "employeeCount", title: t('employees', undefined, locale), align: "right", sortable: true, filterable: false },
 	]);
 </script>
 
 <PageShell
     bind:this={pageShell}
-	title={t('user', undefined, locale)}
+	title={t('departments', undefined, locale)}
 	onSearch={handleSearch}
 	onClear={handleClear}
 >
 	{#snippet filter(pageState)}
-		<SelectField
-			label={t('role', undefined, locale)}
-			hint={t('filterByRole', undefined, locale)}
-			bind:value={role}
-			options={RoleList.map((r) => ({ key: r.key, label: t(r.label as never, undefined, locale) }))}
-			colSpan={1}
-		/>
-		<SelectField
-			label={t('status', undefined, locale)}
-			hint={t('filterByStatus', undefined, locale)}
-			bind:value={status}
-			options={statusOptions}
-			colSpan={1}
-		/>
 		<EditField
-			id="user-search-input"
+			id="department-search-input"
 			label={t('search', undefined, locale)}
 			hint={t('searchHint', undefined, locale)}
 			type="text"
@@ -139,45 +107,47 @@
 
 	{#snippet content(shell)}
 		<Table
-			id="tblUsers"
-			caption={t('users', undefined, locale)}
-			data={filteredUsers as unknown as Record<string, unknown>[]}
+			id="tblDepartments"
+			caption={t('departments', undefined, locale)}
+			data={filteredDepartments as unknown as Record<string, unknown>[]}
 			rowKey="id"
-			csvFileName="users.csv"
+			csvFileName="departments.csv"
 			columns={colunas}
+			defaultSortKey="name"
+			defaultSortDirection="asc"
 			actions={[
 				{
 					title: t('view', undefined, locale),
-					hint: t('viewUserDetails', undefined, locale),
+					hint: t('viewDepartmentDetails', undefined, locale),
 					icon: "eye",
 					onClick: (row) => shell.show(row),
 				},
 				{
 					title: t('edit', undefined, locale),
-					hint: t('editUser', undefined, locale),
+					hint: t('editDepartment', undefined, locale),
 					icon: "edit",
 					onClick: (row) => shell.edit(row),
 				},
 				{
 					title: t('delete', undefined, locale),
-					hint: t('deleteUser', undefined, locale),
+					hint: t('deleteDepartment', undefined, locale),
 					icon: "trash",
 					onClick: (row) => shell.deleteRow(row),
 				},
 			]}
 			onAdd={() => {
-				const nova: User = { role: "X", login: "", name: "" };
+				const nova: Department = { name: "" };
 				shell.edit(nova as unknown as Record<string, unknown>);
 			}}
 		/>
 	{/snippet}
 
 	{#snippet detailContent(shell)}
-		<UserDetail
-			user={shell.selectedItem as unknown as User | undefined}
+		<DepartmentDetail
+			department={shell.selectedItem as unknown as Department | undefined}
 			action={shell.detailAction}
 			onClose={() => shell.close()}
-			onAction={handleUserAction}
+			onAction={handleDepartmentAction}
 		/>
 	{/snippet}
 </PageShell>

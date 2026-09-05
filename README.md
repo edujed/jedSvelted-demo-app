@@ -120,11 +120,11 @@ The library's `Layout` receives the `router` and renders navbar/sidenav. Routes 
 
 `DetailShell` manages the panel state (mode, selected item, form). The content changes based on the `action`:
 
-| Mode      | Displayed                              | Actions          |
-| --------- | -------------------------------------- | ---------------- |
-| `detail`  | Data grid (read-only)                  | —                |
-| `edit`    | Form with `EditField`/`SelectField`    | Save / Cancel    |
-| `delete`  | Data + confirmation message            | Delete / Cancel  |
+| Mode     | Displayed                           | Actions         |
+| -------- | ----------------------------------- | --------------- |
+| `detail` | Data grid (read-only)               | —               |
+| `edit`   | Form with `EditField`/`SelectField` | Save / Cancel   |
+| `delete` | Data + confirmation message         | Delete / Cancel |
 
 ```svelte
 <script lang="ts">

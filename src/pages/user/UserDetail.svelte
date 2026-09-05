@@ -6,9 +6,12 @@
 	import { Button, InfoGrid } from "@edujed/jedsvelted-ui/ui";
 	import {
 		RoleList,
+		StatusList,
+		getActivityByUser,
 		type User,
 		type UserRole,
 		type UserStatus,
+		type UserActivity,
 	} from "../../services/user.service";
 	import type { ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import UserPermissions from "./UserPermissions.svelte"
@@ -18,11 +21,10 @@
 
 	let locale = $derived($localeStore);
 
-	const StatusList = $derived([
-		{ key: "active", label: t('active', undefined, locale) },
-		{ key: "inactive", label: t('inactive', undefined, locale) },
-		{ key: "pending", label: t('pending', undefined, locale) },
-	]);
+	// Translated status options — reactive to locale changes.
+	const statusOptions = $derived(
+		StatusList.map((s) => ({ key: s.key, label: t(s.label as never, undefined, locale) }))
+	);
 
 	let {
 		user,
@@ -63,10 +65,27 @@
 		{ label: "ID", value: user?.id },
 		{ label: t('login', undefined, locale), value: user?.login },
 		{ label: t('name', undefined, locale), value: user?.name },
+		{ label: t('email', undefined, locale), value: user?.email },
 		{ label: t('role', undefined, locale), value: RoleList.find((r) => r.key === user?.role) ? t(RoleList.find((r) => r.key === user?.role)!.label as never, undefined, locale) : user?.role },
 		{ label: t('department', undefined, locale), value: user?.department },
 		{ label: t('status', undefined, locale), value: user?.status },
+		{ label: t('createdAt', undefined, locale), value: user?.createdAt ? new Date(user.createdAt).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US') : undefined },
+		{ label: t('lastLogin', undefined, locale), value: user?.lastLogin ? new Date(user.lastLogin).toLocaleString(locale === 'pt-BR' ? 'pt-BR' : 'en-US') : undefined },
 	]);
+
+	// Activity log state
+	let activity = $state<UserActivity[]>([]);
+
+	$effect(() => {
+		if (user?.id) {
+			getActivityByUser(user.id).then((result) => {
+				activity = result.map((a) => ({
+				...a,
+				description: t(a.description as never, undefined, locale),
+			}));
+			});
+		}
+	});
 
 	function handleSave() {
 		const updated: User = {
@@ -83,6 +102,18 @@
 	function handleDelete() {
 		if (user) {
 			onAction?.("delete", user);
+		}
+	}
+
+	function activityIcon(type: UserActivity['type']): string {
+		switch (type) {
+			case 'login': return '🔓';
+			case 'logout': return '🔒';
+			case 'password_change': return '🔑';
+			case 'profile_update': return '👤';
+			case 'permission_change': return '🛡️';
+			case 'role_change': return '🔄';
+			default: return '📋';
 		}
 	}
 </script>
@@ -106,7 +137,7 @@
           <Tabs
             tabs={[
               { value: 'permissions', label: t('permissions', undefined, locale) },
-              { value: 'profiles', label: t('profiles', undefined, locale) }
+              { value: 'activity', label: t('activity', undefined, locale) }
             ]}
             activeTab={currentTab}
           >
@@ -116,8 +147,25 @@
                   id={user.id}
                   inline
                 />
-              {:else if tabValue === 'profiles'}
-                <p class="empty-hint">{t('noProfiles', undefined, locale)}</p>
+              {:else if tabValue === 'activity'}
+                {#if activity.length === 0}
+                  <p class="empty-hint">{t('noActivity', undefined, locale)}</p>
+                {:else}
+                  <div class="activity-list">
+                    {#each activity as item (item.id)}
+                      <div class="activity-item">
+                        <span class="activity-icon">{activityIcon(item.type)}</span>
+                        <div class="activity-content">
+                          <span class="activity-desc">{item.description}</span>
+                          <span class="activity-meta">
+                            {new Date(item.timestamp).toLocaleString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
+                            {#if item.ip}<span class="activity-ip">· {item.ip}</span>{/if}
+                          </span>
+                        </div>
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
               {/if}
             {/snippet}
           </Tabs>
@@ -157,7 +205,7 @@
 						label={t('status', undefined, locale)}
 						hint={t('accountStatusHint', undefined, locale)}
 						bind:value={formStatus}
-						options={StatusList}
+						options={statusOptions}
 						colSpan={1}
 					/>
 					<EditField
@@ -234,5 +282,53 @@
 		font-size: var(--font-size-sm);
 		color: var(--text-muted);
 		padding: 1rem 0;
+	}
+
+	.activity-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.activity-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.activity-item:last-child {
+		border-bottom: none;
+	}
+
+	.activity-icon {
+		font-size: 1.1rem;
+		line-height: 1;
+		flex-shrink: 0;
+		margin-top: 0.1rem;
+	}
+
+	.activity-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		flex: 1;
+	}
+
+	.activity-desc {
+		font-size: var(--font-size-sm);
+		color: var(--color-on-surface);
+		font-weight: 500;
+	}
+
+	.activity-meta {
+		font-size: var(--font-size-xs);
+		color: var(--color-on-surface);
+		opacity: 0.6;
+	}
+
+	.activity-ip {
+		font-family: monospace;
 	}
 </style>

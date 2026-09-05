@@ -29,31 +29,34 @@
 		inline?: boolean;
 	} = $props();
 
-	// Single source of truth for the permissions list. The array is never
-	// reassigned — it is mutated in place (splice) so the stable dataRef below
-	// always points to the live list, even across user changes.
-	let permissions = $state<Permission[]>([]);
+	// Loads the mocked permissions whenever the user id changes. The raw data
+	// is stored separately; the translated list is derived so it stays in sync
+	// with the locale without re-triggering the load effect.
+	let rawPermissions = $state<Permission[]>([]);
+	let lastLoadedId = $state<number | null>(null);
 
-	// Unified CRUD handler — mutates the permissions list in place and fires
-	// the standardized toast. The component is the owner of this data slice.
+	$effect(() => {
+		if (id === lastLoadedId) return; // Only reload when the user actually changes
+		lastLoadedId = id;
+		getPermissionsByUser(id).then((result) => {
+			rawPermissions = result;
+		});
+	});
+
+	// Translated view of the permissions — reactive to locale changes.
+	const translatedPermissions = $derived(
+		rawPermissions.map((p) =>
+			p.description ? { ...p, description: t(p.description as never, undefined, locale) } : p
+		)
+	);
+
+	// Unified CRUD handler — mutates the raw list in place and fires the
+	// standardized toast. The component is the owner of this data slice.
 	const { handleDetailAction } = createHandleDetail<Permission>({
-		dataRef: { data: permissions },
+		dataRef: { data: rawPermissions },
 		toast,
 		itemName: () => t('permissions', undefined, locale),
 		displayFields: ["module", "action"],
-	});
-
-	// Loads the mocked permissions whenever the user id changes. Splice keeps
-	// the same array instance so dataRef stays valid.
-	$effect(() => {
-		permissions.splice(0, permissions.length);
-		getPermissionsByUser(id).then((result) => {
-			// Translate description keys for the current locale
-			const translated = result.map((p) =>
-				p.description ? { ...p, description: t(p.description as never, undefined, locale) } : p
-			);
-			permissions.splice(0, permissions.length, ...translated);
-		});
 	});
 
 	// Form state
@@ -141,8 +144,8 @@
 	csvFileName="permissions.csv"
 	{inline}
 	{columns}
-	data={permissions as unknown as Record<string, unknown>[]}
-	onAction={(action, item) => {
+	data={translatedPermissions as unknown as Record<string, unknown>[]}
+	onAction={(action: ActionEvent, item: Record<string, unknown>) => {
 		if (action === 'delete') handleDetailAction('delete', item as unknown as Permission);
 	}}
 	renderView={viewContent as any}

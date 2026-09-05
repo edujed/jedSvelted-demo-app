@@ -8,6 +8,7 @@
 	import { HashRouter } from "@edujed/jedsvelted-ui/router";
 	import HomePage from "./pages/HomePage.svelte";
 	import UserPage from "./pages/user/UserPage.svelte";
+	import DepartmentPage from "./pages/department/DepartmentPage.svelte";
 
 	initTheme();
 	initI18n();
@@ -50,6 +51,20 @@
 			icon: "👤",
 			showInMenu: false,
 		}, // internal sub-pages
+		{
+			pattern: "/departments",
+			moduleName: "departments",
+			title: () => t('departments'),
+			icon: "🏢",
+			showInMenu: true,
+		},
+		{
+			pattern: "/departments/:id",
+			moduleName: "departments",
+			title: () => t('department'),
+			icon: "🏢",
+			showInMenu: false,
+		}, // internal item
 	];
 
 	// Registers all routes with their full metadata in the internal router.
@@ -71,11 +86,18 @@
 	let currentUserId = $derived(
 		routeState?.routeParams?.id ? Number(routeState.routeParams.id) : undefined
 	);
+
+	// Derives the department ID from the current route (e.g.: /departments/3 → id=3)
+	let currentDepartmentId = $derived(
+		routeState?.routeParams?.id ? Number(routeState.routeParams.id) : undefined
+	);
 </script>
 
 <Layout {router}>
 	{#if routeState?.moduleName === "users"}
 		<UserPage role="-" autoOpenId={currentUserId} />
+	{:else if routeState?.moduleName === "departments"}
+		<DepartmentPage autoOpenId={currentDepartmentId} />
 	{:else}
 		<HomePage />
 	{/if}
