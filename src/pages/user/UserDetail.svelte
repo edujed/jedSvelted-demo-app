@@ -3,13 +3,16 @@
 	import { EditField } from "@edujed/jedsvelted-ui/forms";
 	import { SelectField } from "@edujed/jedsvelted-ui/forms";
 	import { Panel } from "@edujed/jedsvelted-ui/container";
-	import { Button } from "@edujed/jedsvelted-ui/ui";
+	import { Button, InfoGrid } from "@edujed/jedsvelted-ui/ui";
 	import {
 		RoleList,
 		type User,
 		type UserRole,
 		type UserStatus,
 	} from "../../services/user.service";
+	import type { ActionEvent } from "@edujed/jedsvelted-ui/actions";
+	import UserPermissions from "./UserPermissions.svelte"
+    import { Tabs } from "@edujed/jedsvelted-ui/tabs";
 
 	const StatusList = [
 		{ key: "active", label: "Active" },
@@ -21,15 +24,16 @@
 		user,
 		action = "detail",
 		onClose,
-		onSave,
-		onDelete,
+		onAction,
 	}: {
 		user?: User;
 		action?: "detail" | "edit" | "delete";
 		onClose?: () => void;
-		onSave?: (user: User) => void;
-		onDelete?: (user: User) => void;
+		/** Single event contract: (action, item). The page owns data + toast. */
+		onAction?: (action: ActionEvent, item: User) => void;
 	} = $props();
+
+    let currentTab = $state<string>('permissions');
 
 	// Form state — synced with the user prop via $effect
 	let formLogin = $state("");
@@ -50,6 +54,16 @@
 
 	const isReadOnly = $derived(action === "detail");
 
+	// Fields shared by the detail and delete modes (role resolved to its label).
+	const userFields = $derived([
+		{ label: "ID", value: user?.id },
+		{ label: "Login", value: user?.login },
+		{ label: "Name", value: user?.name },
+		{ label: "Role", value: RoleList.find((r) => r.key === user?.role)?.label ?? user?.role },
+		{ label: "Department", value: user?.department },
+		{ label: "Status", value: user?.status },
+	]);
+
 	function handleSave() {
 		const updated: User = {
 			id: user?.id,
@@ -59,12 +73,12 @@
 			role: formRole,
 			status: formStatus,
 		};
-		onSave?.(updated);
+		onAction?.(user?.id ? "update" : "create", updated);
 	}
 
 	function handleDelete() {
 		if (user) {
-			onDelete?.(user);
+			onAction?.("delete", user);
 		}
 	}
 </script>
@@ -80,35 +94,30 @@
 		<!-- View mode -->
 		{#if isMode("detail")}
 			<Panel title="Basic info" iconName="user">
-				<div class="detail-grid">
-					<div class="detail-field">
-						<span class="detail-label">ID</span>
-						<span class="detail-value">{user?.id ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Login</span>
-						<span class="detail-value">{user?.login ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Name</span>
-						<span class="detail-value">{user?.name ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Role</span>
-						<span class="detail-value">
-							{RoleList.find((r) => r.key === user?.role)?.label ?? user?.role ?? "—"}
-						</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Department</span>
-						<span class="detail-value">{user?.department ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Status</span>
-						<span class="detail-value">{user?.status ?? "—"}</span>
-					</div>
-				</div>
+				<InfoGrid items={userFields} />
 			</Panel>
+
+   <div class="detail-section">
+          <h3 class="section-title">Related Records</h3>
+          <Tabs
+            tabs={[
+              { value: 'permissions', label: 'Permissions' },
+              { value: 'profiles', label: 'Profiles' }
+            ]}
+            activeTab={currentTab}
+          >
+            {#snippet tabContent(tabValue)}
+              {#if tabValue === 'permissions' && user?.id}
+                <UserPermissions
+                  id={user.id}
+                  inline
+                />
+              {:else if tabValue === 'profiles'}
+                <p class="empty-hint">No profiles assigned to this user.</p>
+              {/if}
+            {/snippet}
+          </Tabs>
+        </div>
 		{/if}
 
 		<!-- Edit mode -->
@@ -167,34 +176,7 @@
 		<!-- Delete mode -->
 		{#if isMode("delete")}
 			<Panel title="Delete user" iconName="trash">
-				<div class="detail-grid">
-					<div class="detail-field">
-						<span class="detail-label">ID</span>
-						<span class="detail-value">{user?.id ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Login</span>
-						<span class="detail-value">{user?.login ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Name</span>
-						<span class="detail-value">{user?.name ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Role</span>
-						<span class="detail-value">
-							{RoleList.find((r) => r.key === user?.role)?.label ?? user?.role ?? "—"}
-						</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Department</span>
-						<span class="detail-value">{user?.department ?? "—"}</span>
-					</div>
-					<div class="detail-field">
-						<span class="detail-label">Status</span>
-						<span class="detail-value">{user?.status ?? "—"}</span>
-					</div>
-				</div>
+				<InfoGrid items={userFields} />
 				<p class="delete-message">
 					Are you sure you want to delete
 					<strong>{user?.name ?? "this user"}</strong>
@@ -213,31 +195,6 @@
 </DetailShell>
 
 <style>
-	.detail-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.75rem 1.5rem;
-	}
-
-	.detail-field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	.detail-label {
-		font-size: var(--font-size-xs);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--text-muted);
-	}
-
-	.detail-value {
-		font-size: var(--font-size-sm);
-		color: var(--color-on-surface);
-	}
-
 	.form-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -263,5 +220,15 @@
 		padding: 0.125rem 0.375rem;
 		border-radius: var(--radius-sm);
 		font-size: var(--font-size-xs);
+	}
+
+	.detail-section {
+		margin-top: 1.5rem;
+	}
+
+	.empty-hint {
+		font-size: var(--font-size-sm);
+		color: var(--text-muted);
+		padding: 1rem 0;
 	}
 </style>

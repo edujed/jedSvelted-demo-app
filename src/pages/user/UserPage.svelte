@@ -12,6 +12,8 @@
 		getUserById,
 	} from "../../services/user.service";
 	import { Table, type TableCol } from "@edujed/jedsvelted-ui/table";
+	import { createHandleDetail, type ActionEvent } from "@edujed/jedsvelted-ui/actions";
+	import { toast } from "@edujed/jedsvelted-ui/info";
 
 	let pageShell: { showDetail: (row: Record<string, unknown>) => void; closeDetail: () => void } | undefined = $state(undefined);
 
@@ -51,37 +53,30 @@
 		}
 	});
 
-	// Handlers for save/delete coming from UserDetail
-	const handleSave = (updated: User) => {
-		console.log("[UserPage] Save", updated);
-		// Updates the local list
-		if (updated.id) {
-			const idx = filteredUsers.findIndex((u) => u.id === updated.id);
-			if (idx >= 0) filteredUsers[idx] = updated;
-		}
-		pageShell?.closeDetail();
-	};
-
-	const handleDelete = (toDelete: User) => {
-		console.log("[UserPage] Delete", toDelete);
-		if (toDelete.id) {
-			filteredUsers = filteredUsers.filter((u) => u.id !== toDelete.id);
-		}
-		pageShell?.closeDetail();
-	};
-
 	// Local state for search/filtering
 	let searchTerm = $state("");
 	const handleSearch = () => {
-		console.log("[UserPage] Search clicked", { searchTerm });
 		filteredUsers = filterUsers(UserList, searchTerm, role as UserRole);
 	};
 	const handleClear = () => {
-		searchTerm = "";
-		console.log("[UserPage] Clear clicked");
 		role = "-";
 		searchTerm = "";
 		filteredUsers = [];
+	};
+
+	// Unified CRUD handler — mutates the source list (UserList) and fires the
+	// standardized toast. The page is the single owner of data + notification.
+	const { handleDetailAction } = createHandleDetail<User>({
+		dataRef: { data: UserList },
+		toast,
+		itemName: "User",
+		displayFields: ["name"],
+	});
+
+	// Single event contract from UserDetail: (action, item).
+	const handleUserAction = (action: ActionEvent, item: User) => {
+		handleDetailAction(action, item);
+		pageShell?.closeDetail();
 	};
 
 	// Table columns
@@ -159,9 +154,8 @@
 		<UserDetail
 			user={shell.selectedItem as unknown as User | undefined}
 			action={shell.detailAction}
-			onClose={shell.close}
-			onSave={handleSave}
-			onDelete={handleDelete}
+			onClose={() => shell.close()}
+			onAction={handleUserAction}
 		/>
 	{/snippet}
 </PageShell>
