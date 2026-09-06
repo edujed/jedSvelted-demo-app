@@ -7,9 +7,8 @@
 	import { Layout } from "@edujed/jedsvelted-ui/router";
 	import { HashRouter } from "@edujed/jedsvelted-ui/router";
 	import HomePage from "./pages/HomePage.svelte";
-	import UserPage from "./pages/user/UserPage.svelte";
 	import DepartmentPage from "./pages/department/DepartmentPage.svelte";
-	import FileTreePage from "./pages/FileTreePage.svelte";
+	import UserPage from "./pages/user/UserPage.svelte";
 
 	initTheme();
 	initI18n();
@@ -30,8 +29,21 @@
 			title: () => t('home'),
 			icon: "🏠",
 			showInMenu: false,
-		}, // redirects to /
+		},
 		{
+		pattern: "/departments",
+		moduleName: "departments",
+		title: () => t('departments'),
+		icon: "🏢",
+		showInMenu: true,
+	},
+	{
+		pattern: "/departments/:id",
+		moduleName: "departments",
+		title: () => t('department'),
+		icon: "🏢",
+		showInMenu: false,
+	}, {
 			pattern: "/users",
 			moduleName: "users",
 			title: () => t('users'),
@@ -51,27 +63,6 @@
 			title: () => t('user'),
 			icon: "👤",
 			showInMenu: false,
-		}, // internal sub-pages
-		{
-			pattern: "/departments",
-			moduleName: "departments",
-			title: () => t('departments'),
-			icon: "🏢",
-			showInMenu: true,
-		},
-		{
-			pattern: "/departments/:id",
-			moduleName: "departments",
-			title: () => t('department'),
-			icon: "🏢",
-			showInMenu: false,
-		}, // internal item
-		{
-			pattern: "/filetree",
-			moduleName: "filetree",
-			title: () => t('fileTree'),
-			icon: "🌲",
-			showInMenu: true,
 		},
 	];
 
@@ -102,16 +93,14 @@
 </script>
 
 <Layout {router}>
-	{#if routeState?.moduleName === "users"}
-		<UserPage role="-" autoOpenId={currentUserId} />
-	{:else if routeState?.moduleName === "departments"}
-		<DepartmentPage autoOpenId={currentDepartmentId} />
-	{:else if routeState?.moduleName === "filetree"}
-		<FileTreePage />
-	{:else}
-		<HomePage />
-	{/if}
-	<!--
+  {#if routeState?.moduleName === "users"}
+    <UserPage role="-" autoOpenId={currentUserId} />
+  {:else if routeState?.moduleName === "departments"}
+    <DepartmentPage autoOpenId={currentDepartmentId} />
+  {:else}
+    <HomePage />
+  {/if}
+  <!--
 	<div style="padding:2rem">
 		<p><strong>path:</strong> {routeState.path}</p>
 		<p><strong>title:</strong> {routeState.title || "-"}</p>

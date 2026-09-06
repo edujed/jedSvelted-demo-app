@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DetailShell } from "@edujed/jedsvelted-ui/pages";
-	import { EditField } from "@edujed/jedsvelted-ui/forms";
+	import { EditField, NumericField } from "@edujed/jedsvelted-ui/forms";
 	import { Panel } from "@edujed/jedsvelted-ui/container";
 	import { Button, InfoGrid } from "@edujed/jedsvelted-ui/ui";
 	import type { Department } from "../../services/department.service";
@@ -28,7 +28,7 @@
 	let formCode = $state("");
 	let formLocation = $state("");
 	let formManager = $state("");
-	let formEmployeeCount = $state("0");
+	let formEmployeeCount = $state(0);
 
 	$effect(() => {
 		if (department) {
@@ -36,7 +36,7 @@
 			formCode = department.code ?? "";
 			formLocation = department.location ?? "";
 			formManager = department.manager ?? "";
-			formEmployeeCount = department.employeeCount != null ? String(department.employeeCount) : "";
+			formEmployeeCount = department.employeeCount ?? 0;
 		}
 	});
 
@@ -58,7 +58,7 @@
 			code: formCode || undefined,
 			location: formLocation || undefined,
 			manager: formManager || undefined,
-			employeeCount: formEmployeeCount === "" ? undefined : Number(formEmployeeCount),
+			employeeCount: formEmployeeCount || undefined,
 		};
 		onAction?.(department?.id ? "update" : "create", updated);
 	}
@@ -93,6 +93,8 @@
 						id="department-edit-name"
 						label={t('name', undefined, locale)}
 						hint={t('departmentHint', undefined, locale)}
+						hintTitle={t('name', undefined, locale)}
+						hintImpact={t('departmentHintImpact', undefined, locale)}
 						type="text"
 						placeholder="e.g. Engineering"
 						bind:value={formName}
@@ -102,6 +104,8 @@
 						id="department-edit-code"
 						label={t('code', undefined, locale)}
 						hint={t('codeHint', undefined, locale)}
+						hintTitle={t('code', undefined, locale)}
+						hintImpact={t('codeHintImpact', undefined, locale)}
 						type="text"
 						placeholder="e.g. ENG"
 						bind:value={formCode}
@@ -111,6 +115,8 @@
 						id="department-edit-location"
 						label={t('location', undefined, locale)}
 						hint={t('locationHint', undefined, locale)}
+						hintTitle={t('location', undefined, locale)}
+						hintImpact={t('locationHintImpact', undefined, locale)}
 						type="text"
 						placeholder="e.g. Building A"
 						bind:value={formLocation}
@@ -120,17 +126,22 @@
 						id="department-edit-manager"
 						label={t('manager', undefined, locale)}
 						hint={t('managerHint', undefined, locale)}
+						hintTitle={t('manager', undefined, locale)}
+						hintImpact={t('managerHintImpact', undefined, locale)}
 						type="text"
 						placeholder="e.g. João Pereira"
 						bind:value={formManager}
 						colSpan={1}
 					/>
-					<EditField
+					<NumericField
 						id="department-edit-employee-count"
 						label={t('employees', undefined, locale)}
 						hint={t('employeeCountHint', undefined, locale)}
-						type="number"
+						hintTitle={t('employees', undefined, locale)}
+						hintImpact={t('employeeCountHintImpact', undefined, locale)}
 						bind:value={formEmployeeCount}
+						min={0}
+						step={1}
 						colSpan={1}
 					/>
 				</div>

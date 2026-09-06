@@ -25,7 +25,7 @@
 		"vite-plugin-pwa": "^1.3.0"
 	},
 	"dependencies": {
-		"@edujed/jedsvelted-ui": "0.0.1-alpha.4",
+		"@edujed/jedsvelted-ui": "0.0.1-alpha.5",
 		"gh-pages": "^6.3.0",
 		"save-dev": "^0.0.1-security",
 		"vite-plugin-singlefile": "^2.3.3"
