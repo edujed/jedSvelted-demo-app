@@ -100,6 +100,11 @@ export default {
   edit: "Edit",
   delete: "Delete",
 
+  // FileTree demo
+  fileTree: "File Tree",
+  selectedFiles: "Selected files",
+  viewedFile: "Viewed file",
+
   // Departments
   departments: "Departments",
   code: "Code",

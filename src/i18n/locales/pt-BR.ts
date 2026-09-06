@@ -98,6 +98,11 @@ const ptBR: DemoMessages = {
   edit: "Editar",
   delete: "Excluir",
 
+  // FileTree demo
+  fileTree: "Árvore de Arquivos",
+  selectedFiles: "Arquivos selecionados",
+  viewedFile: "Arquivo visualizado",
+
   // Departments
   departments: "Departamentos",
   code: "Código",

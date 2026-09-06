@@ -4,11 +4,12 @@
 	import { initI18n } from "@edujed/jedsvelted-ui/i18n";
 	import { t } from "./i18n";
 	import { ToastContainer } from "@edujed/jedsvelted-ui/info";
-	import { Layout } from "@edujed/jedsvelted-ui/container";
+	import { Layout } from "@edujed/jedsvelted-ui/router";
 	import { HashRouter } from "@edujed/jedsvelted-ui/router";
 	import HomePage from "./pages/HomePage.svelte";
 	import UserPage from "./pages/user/UserPage.svelte";
 	import DepartmentPage from "./pages/department/DepartmentPage.svelte";
+	import FileTreePage from "./pages/FileTreePage.svelte";
 
 	initTheme();
 	initI18n();
@@ -65,6 +66,13 @@
 			icon: "🏢",
 			showInMenu: false,
 		}, // internal item
+		{
+			pattern: "/filetree",
+			moduleName: "filetree",
+			title: () => t('fileTree'),
+			icon: "🌲",
+			showInMenu: true,
+		},
 	];
 
 	// Registers all routes with their full metadata in the internal router.
@@ -98,6 +106,8 @@
 		<UserPage role="-" autoOpenId={currentUserId} />
 	{:else if routeState?.moduleName === "departments"}
 		<DepartmentPage autoOpenId={currentDepartmentId} />
+	{:else if routeState?.moduleName === "filetree"}
+		<FileTreePage />
 	{:else}
 		<HomePage />
 	{/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { CrudPanel } from "@edujed/jedsvelted-ui/ui";
-	import { FormActions } from "@edujed/jedsvelted-ui/ui";
+	import { CrudPanel } from "@edujed/jedsvelted-ui/container";
+	import { FormActions } from "@edujed/jedsvelted-ui/forms";
 	import { EditField } from "@edujed/jedsvelted-ui/forms";
 	import { SelectField } from "@edujed/jedsvelted-ui/forms";
 	import { toast } from "@edujed/jedsvelted-ui/info";

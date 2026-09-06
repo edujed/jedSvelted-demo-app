@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { viteSingleFile } from "vite-plugin-singlefile";
+import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   // Ativa o modo arquivo único se a variável estiver presente
   const isSingleFile = process.env.VITE_SINGLE_FILE === "true";
 
@@ -11,6 +12,26 @@ export default defineConfig(({ mode }) => {
       svelte(),
       // O plugin injeta o CSS/JS no HTML apenas se for build single-file
       ...(isSingleFile ? [viteSingleFile()] : []),
+      // Configuração do WebApp Instalável
+      VitePWA({
+             registerType: "autoUpdate",
+             manifest: {
+               name: "JedSvelted Demo App",
+               short_name: "JedSvelted",
+               description: "Demonstração da biblioteca @edujed/jedsvelted-ui",
+               theme_color: "#ff3e00",
+               background_color: "#ffffff",
+               display: "standalone", // Faz o app abrir em tela cheia, sem barra de endereço do navegador
+               icons: [
+                 {
+                   src: "https://svelte.dev", // Ícone temporário (pode usar o seu depois)
+                   sizes: "512x512",
+                   type: "image/svg+xml",
+                   purpose: "any maskable"
+                 }
+               ]
+             }
+           }),
     ],
     server: {
       fs: {
