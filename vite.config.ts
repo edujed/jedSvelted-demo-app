@@ -14,24 +14,24 @@ export default defineConfig(() => {
       ...(isSingleFile ? [viteSingleFile()] : []),
       // Configuração do WebApp Instalável
       VitePWA({
-             registerType: "autoUpdate",
-             manifest: {
-               name: "JedSvelted Demo App",
-               short_name: "JedSvelted",
-               description: "Demonstração da biblioteca @edujed/jedsvelted-ui",
-               theme_color: "#ff3e00",
-               background_color: "#ffffff",
-               display: "standalone", // Faz o app abrir em tela cheia, sem barra de endereço do navegador
-               icons: [
-                 {
-                   src: "https://svelte.dev", // Ícone temporário (pode usar o seu depois)
-                   sizes: "512x512",
-                   type: "image/svg+xml",
-                   purpose: "any maskable"
-                 }
-               ]
-             }
-           }),
+        registerType: "autoUpdate",
+        manifest: {
+          name: "JedSvelted Demo App",
+          short_name: "JedSvelted",
+          description: "Demonstração da biblioteca @edujed/jedsvelted-ui",
+          theme_color: "#ff3e00",
+          background_color: "#ffffff",
+          display: "standalone", // Faz o app abrir em tela cheia, sem barra de endereço do navegador
+          icons: [
+            {
+              src: "https://svelte.dev", // Ícone temporário (pode usar o seu depois)
+              sizes: "512x512",
+              type: "image/svg+xml",
+              purpose: "any maskable",
+            },
+          ],
+        },
+      }),
     ],
     server: {
       fs: {

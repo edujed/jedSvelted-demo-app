@@ -20,9 +20,12 @@
 
 	let {
 		autoOpenId = $bindable(0),
+		onRecordNotFound,
 	}: {
 		/** Record ID to open automatically on mount/navigation. */
 		autoOpenId?: number | undefined;
+		/** Called when autoOpenId is set but the record is not found. */
+		onRecordNotFound?: (id: number) => void;
 	} = $props();
 
 	// Reactive state with explicit type to avoid 'never[]' inference.
@@ -32,22 +35,46 @@
 	// when the pageShell reference changes (bind:this) but autoOpenId did not.
 	let lastAutoOpenId = $state<number | undefined>(undefined);
 
+	// Filter panel visibility — collapsed on deep-link (with id), restored when leaving.
+	let filterOpen = $state(true);
+
 	$effect(() => {
 		if (!pageShell) return;
 		// Only acts when autoOpenId changes (not when pageShell changes)
 		if (autoOpenId === lastAutoOpenId) return;
+		// Save the previous value BEFORE updating, so we can detect leaving a :id route.
+		const prevAutoOpenId = lastAutoOpenId;
 		lastAutoOpenId = autoOpenId;
 
 		if (autoOpenId && autoOpenId > 0) {
 			const departments = getDepartmentById(autoOpenId);
 			if (departments.length > 0) {
+				// Deep-link: show the record in the table and collapse the filter panel.
+				filteredDepartments = departments;
+				filterOpen = false;
+				// Close first, then open. The PageShell's {#key detailKey} forces the
+				// detail content to remount fresh, so the close→show in the same tick
+				// still produces a clean remount (e.g.: /departments/3 → /departments/5).
+				pageShell.closeDetail();
 				pageShell.showDetail(departments[0] as unknown as Record<string, unknown>);
+			} else {
+				// Deep-link to a non-existent department — "safe mode": show the
+				// full list (panel open) and notify via toast.
+				filteredDepartments = DepartmentList;
+				filterOpen = true;
+				pageShell.closeDetail();
+				onRecordNotFound?.(autoOpenId);
 			}
-		} else if (lastAutoOpenId && lastAutoOpenId > 0) {
+		} else if (prevAutoOpenId && prevAutoOpenId > 0) {
 			// Only closes when leaving a /departments/:id route (e.g.: /departments/3 → /departments).
 			// On initial mount (autoOpenId=0) it does not close — avoids closing a panel
 			// that was opened via a table action.
 			pageShell.closeDetail();
+			// Leave the deep-link: reset the search and reopen the filter panel.
+			// Keep the current table data (the single record from the deep-link) —
+			// the user can click Search to load the full list if desired.
+			searchTerm = "";
+			filterOpen = true;
 		}
 	});
 
@@ -92,6 +119,7 @@
 	title={t('departments', undefined, locale)}
 	onSearch={handleSearch}
 	onClear={handleClear}
+	bind:filterOpen
 >
 	{#snippet filter(pageState)}
 		<EditField

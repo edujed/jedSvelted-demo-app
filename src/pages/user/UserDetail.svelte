@@ -29,17 +29,24 @@
 	let {
 		user,
 		action = "detail",
+		activeTab = $bindable("permissions"),
+		permissionId = $bindable(0),
 		onClose,
 		onAction,
+		onPermissionNotFound,
 	}: {
 		user?: User;
 		action?: "detail" | "edit" | "delete";
+		/** Active tab (controlled by parent via URL). */
+		activeTab?: string;
+		/** Permission ID to open automatically (controlled by parent via URL). */
+		permissionId?: number;
 		onClose?: () => void;
 		/** Single event contract: (action, item). The page owns data + toast. */
 		onAction?: (action: ActionEvent, item: User) => void;
+		/** Called when permissionId is set but the record is not found. */
+		onPermissionNotFound?: (id: number) => void;
 	} = $props();
-
-    let currentTab = $state<string>('permissions');
 
 	// Form state — synced with the user prop via $effect
 	let formLogin = $state("");
@@ -139,13 +146,15 @@
               { value: 'permissions', label: t('permissions', undefined, locale) },
               { value: 'activity', label: t('activity', undefined, locale) }
             ]}
-            activeTab={currentTab}
+            bind:activeTab
           >
             {#snippet tabContent(tabValue)}
               {#if tabValue === 'permissions' && user?.id}
                 <UserPermissions
                   id={user.id}
                   inline
+                  {permissionId}
+                  {onPermissionNotFound}
                 />
               {:else if tabValue === 'activity'}
                 {#if activity.length === 0}

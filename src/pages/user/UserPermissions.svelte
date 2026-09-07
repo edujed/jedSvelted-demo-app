@@ -22,11 +22,17 @@
 	let {
 		id,
 		inline = false,
+		permissionId = $bindable(0),
+		onPermissionNotFound,
 	}: {
 		/** User ID whose permissions are listed. */
 		id: number;
 		/** Render inside the parent panel instead of an overlay. */
 		inline?: boolean;
+		/** Permission ID to open automatically (controlled by parent via URL). */
+		permissionId?: number;
+		/** Called when permissionId is set but the record is not found. */
+		onPermissionNotFound?: (id: number) => void;
 	} = $props();
 
 	// Loads the mocked permissions whenever the user id changes. The raw data
@@ -53,7 +59,11 @@
 	// Unified CRUD handler — mutates the raw list in place and fires the
 	// standardized toast. The component is the owner of this data slice.
 	const { handleDetailAction } = createHandleDetail<Permission>({
-		dataRef: { data: rawPermissions },
+		dataRef: {
+			get data() {
+				return rawPermissions;
+			}
+		},
 		toast,
 		itemName: () => t('permissions', undefined, locale),
 		displayFields: ["module", "action"],
@@ -149,6 +159,8 @@
 		if (action === 'delete') handleDetailAction('delete', item as unknown as Permission);
 	}}
 	renderView={viewContent as any}
+	autoOpenId={permissionId}
+	onAutoOpenError={onPermissionNotFound}
 >
 	{#snippet renderForm(onComplete)}
 		<div class="form-fields">

@@ -120,15 +120,22 @@ const ptBR: DemoMessages = {
   editDepartmentTitle: "Editar departamento",
   deleteDepartmentTitle: "Excluir departamento",
   codeHint: "Identificador curto e único do departamento.",
-  codeHintImpact: "Usado em URLs e relatórios. Mantenha curto (2–5 caracteres).",
-  locationHint: "Localização física ou prédio onde o departamento está sediado.",
+  codeHintImpact:
+    "Usado em URLs e relatórios. Mantenha curto (2–5 caracteres).",
+  locationHint:
+    "Localização física ou prédio onde o departamento está sediado.",
   locationHintImpact: "Ajuda no planejamento logístico e de escritórios.",
   managerHint: "Nome do gerente do departamento.",
   managerHintImpact: "O gerente aparece como contato padrão do departamento.",
   employeeCountHint: "Total de funcionários no departamento.",
-  employeeCountHintImpact: "Usado em relatórios de headcount e planejamento de capacidade.",
+  employeeCountHintImpact:
+    "Usado em relatórios de headcount e planejamento de capacidade.",
   deleteDepartmentMessage: "Tem certeza de que deseja excluir",
   thisDepartment: "este departamento",
+
+  // Deep-link errors
+  recordNotFound: "Registro não encontrado",
+  errorWithId: "{error} (id: {id})",
 };
 
 export default ptBR;

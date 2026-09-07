@@ -124,9 +124,14 @@ export default {
   locationHint: "Physical location or building where the department is based.",
   locationHintImpact: "Helps with logistics and office planning.",
   managerHint: "Name of the department manager.",
-  managerHintImpact: "The manager appears as the default contact for the department.",
+  managerHintImpact:
+    "The manager appears as the default contact for the department.",
   employeeCountHint: "Total number of employees in the department.",
   employeeCountHintImpact: "Used for headcount reports and capacity planning.",
   deleteDepartmentMessage: "Are you sure you want to delete",
   thisDepartment: "this department",
+
+  // Deep-link errors
+  recordNotFound: "Record not found",
+  errorWithId: "{error} (id: {id})",
 } as const;
