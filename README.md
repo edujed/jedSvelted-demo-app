@@ -2,7 +2,7 @@
 
 Demo application for the [`@edujed/jedsvelted-ui`](https://github.com/edujed/jedSvelted-ui) library.
 
-Shows in practice how to use the library's components in a real Svelte 5 app: layout with navigation, interactive tables with CRUD, detail panels (view/edit/delete), search/filter, tabs, deep-linking, and hash routing.
+Shows in practice how to use the library's components in a real Svelte 5 app: layout with navigation, interactive tables with CRUD, detail panels (view/edit/delete), search/filter, tabs, deep-linking, hash routing, skeleton loading states, currency/date form fields, and locale-aware formatting utilities.
 
 > **Versão em português:** [README-PT-BR.md](./README-PT-BR.md)
 
@@ -45,15 +45,15 @@ demo-app/
 │   ├── pages/
 │   │   ├── HomePage.svelte      # home page (FileTree demo)
 │   │   ├── department/
-│   │   │   ├── DepartmentPage.svelte    # department list (table + search)
-│   │   │   └── DepartmentDetail.svelte  # detail panel (3 modes)
+│   │   │   ├── DepartmentPage.svelte    # department list (table + search + currency formatter)
+│   │   │   └── DepartmentDetail.svelte  # detail panel (3 modes + CurrencyField + formatCurrency/formatDate)
 │   │   └── user/
 │   │       ├── UserPage.svelte          # user list (table + search)
-│   │       ├── UserDetail.svelte        # detail panel (3 modes + tabs)
-│   │       └── UserPermissions.svelte   # nested CRUD (permissions per user)
+│   │       ├── UserDetail.svelte        # detail panel (3 modes + tabs + DateField + Skeleton)
+│   │       └── UserPermissions.svelte   # nested CRUD (permissions per user + Skeleton)
 │   └── services/
-│       ├── user.service.ts      # mock users + activity + filter functions
-│       ├── department.service.ts# mock departments + filter functions
+│       ├── user.service.ts      # mock users (with hiringDate) + activity + filter functions
+│       ├── department.service.ts# mock departments (with annualBudget) + filter functions
 │       ├── permission.service.ts# mock permissions (per user)
 │       └── tree.service.ts      # sample file tree
 ├── vite.config.ts               # svelte plugin + access to sibling lib
@@ -131,6 +131,14 @@ The library's `Layout` receives the `router` and renders navbar/sidenav. Routes 
     handleDetailAction(action, item);
     pageShell?.closeDetail();
   };
+
+  // Simulates async loading so the PageShell's skeleton is visible (mock is synchronous).
+  const handleSearch = () => {
+    pageShell?.setLoadingFor(300);
+    setTimeout(() => {
+      filteredUsers = filterUsers(UserList, searchTerm, role, status);
+    }, 300);
+  };
 </script>
 
 <PageShell title={t("user", undefined, locale)} onSearch={handleSearch} onClear={handleClear} bind:filterOpen>
@@ -175,11 +183,37 @@ The library's `Layout` receives the `router` and renders navbar/sidenav. Routes 
 
 `DetailShell` manages the panel state (mode, selected item, form). The content changes based on the `action`:
 
-| Mode     | Displayed                                 | Actions         |
-| -------- | ----------------------------------------- | --------------- |
-| `detail` | Info grid + tabs (permissions / activity) | —               |
-| `edit`   | Form with `EditField`/`SelectField`       | Save / Cancel   |
-| `delete` | Info grid + confirmation message          | Delete / Cancel |
+| Mode     | Displayed                                       | Actions         |
+| -------- | ----------------------------------------------- | --------------- |
+| `detail` | Info grid + tabs (permissions / activity)       | —               |
+| `edit`   | Form with `EditField`/`SelectField`/`DateField` | Save / Cancel   |
+| `delete` | Info grid + confirmation message                | Delete / Cancel |
+
+The edit form includes a **`DateField`** for the hiring date (binds a `Date | undefined` value, renders a native date picker with locale-aware formatting):
+
+```svelte
+<DateField
+  id="user-edit-hiring-date"
+  label={t('hiringDate', undefined, locale)}
+  hint={t('hiringDateHint', undefined, locale)}
+  hintTitle={t('hiringDate', undefined, locale)}
+  hintImpact={t('hiringDateHintImpact', undefined, locale)}
+  bind:value={formHiringDate}
+  colSpan={2}
+/>
+```
+
+The activity tab shows a **`Skeleton`** (variant `list`) while the mock activity log is loading:
+
+```svelte
+{#if activityLoading}
+  <Skeleton variant="list" rows={3} />
+{:else if activity.length === 0}
+  <p class="empty-hint">{t('noActivity', undefined, locale)}</p>
+{:else}
+  <!-- activity list -->
+{/if}
+```
 
 ```svelte
 <DetailShell item={user} mode={action} entityName={t("user", undefined, locale)} {onClose}>
@@ -219,18 +253,23 @@ The library's `Layout` receives the `router` and renders navbar/sidenav. Routes 
 
 ### 4. Nested CRUD (`UserPermissions.svelte`)
 
-The permissions tab embeds a full `CrudPanel` **inside** the detail panel — a table with its own form/view/delete, driven by the same `createHandleDetail` contract. The data ref uses a **getter** so the `$state` array stays reactive:
+The permissions tab embeds a full `CrudPanel` **inside** the detail panel — a table with its own form/view/delete, driven by the same `createHandleDetail` contract. The data ref uses a **getter** so the `$state` array stays reactive. While the mock permissions are loading, a **`Skeleton`** (variant `table`) is shown instead of the panel:
 
 ```svelte
 <script lang="ts">
   import { CrudPanel } from "@edujed/jedsvelted-ui/container";
   import { createHandleDetail } from "@edujed/jedsvelted-ui/actions";
+  import { Skeleton } from "@edujed/jedsvelted-ui/ui";
 
   let rawPermissions = $state<Permission[]>([]);
+  let permissionsLoading = $state(false);
 
   // Loads the mocked permissions whenever the user id changes.
   $effect(() => {
-    getPermissionsByUser(id).then((result) => { rawPermissions = result; });
+    permissionsLoading = true;
+    Promise.all([getPermissionsByUser(id), new Promise((r) => setTimeout(r, 300))]).then(
+      ([result]) => { rawPermissions = result; permissionsLoading = false; }
+    );
   });
 
   // Getter keeps the $state array reactive inside the handler.
@@ -242,23 +281,33 @@ The permissions tab embeds a full `CrudPanel` **inside** the detail panel — a 
   });
 </script>
 
-<CrudPanel
-  title={t("permissions", undefined, locale)}
-  csvFileName="permissions.csv"
-  {inline}
-  {columns}
-  data={translatedPermissions}
-  onAction={(action, item) => { if (action === "delete") handleDetailAction("delete", item); }}
-  renderView={viewContent}
-  autoOpenId={permissionId}
-  onAutoOpenError={onPermissionNotFound}
->
-  {#snippet renderForm(onComplete)}
-    <!-- form fields -->
-    <FormActions onSave={() => handleSave(onComplete)} onCancel={() => { resetForm(); onComplete(); }} />
-  {/snippet}
-</CrudPanel>
+{#if permissionsLoading}
+  <Skeleton variant="table" rows={4} />
+{:else}
+  <!-- CrudPanel -->
+{/if}
 ```
+
+<CrudPanel
+title={t("permissions", undefined, locale)}
+csvFileName="permissions.csv"
+{inline}
+{columns}
+data={translatedPermissions}
+onAction={(action, item) => { if (action === "delete") handleDetailAction("delete", item); }}
+renderView={viewContent}
+autoOpenId={permissionId}
+onAutoOpenError={onPermissionNotFound}
+
+>
+
+{#snippet renderForm(onComplete)}
+<!-- form fields -->
+<FormActions onSave={() => handleSave(onComplete)} onCancel={() => { resetForm(); onComplete(); }} />
+{/snippet}
+</CrudPanel>
+
+````
 
 ### 5. Routing ↔ panel (deep-linking)
 
@@ -296,7 +345,7 @@ $effect(() => {
     filterOpen = true;
   }
 });
-```
+````
 
 ### 6. i18n (demo + lib messages)
 
@@ -349,6 +398,70 @@ Demonstrates `FileTree` (expand/collapse, file selection, view callback) and `Me
 </PageShell>
 ```
 
+### 8. Currency & date formatting (`DepartmentPage.svelte` / `DepartmentDetail.svelte`)
+
+The Departments module demonstrates the library's **`format`** module and **`CurrencyField`** / **`DateField`** form controls:
+
+**Table column with currency formatter** — the `annualBudget` column uses `formatCurrency` from the `format` module, which resolves the currency symbol and locale-specific separators from the i18n currency definitions:
+
+```ts
+import { formatCurrency } from "@edujed/jedsvelted-ui/format";
+
+const colunas: TableCol[] = $derived([
+  // ...
+  {
+    key: "annualBudget",
+    title: t("annualBudget", undefined, locale),
+    align: "right",
+    sortable: true,
+    filterable: false,
+    formatter: (value) => formatCurrency(value as number | undefined, locale),
+  },
+]);
+```
+
+**Detail panel with formatted values + `InfoGrid` alignment** — numeric and date fields are right-aligned and formatted via the `format` module:
+
+```ts
+import { formatCurrency, formatDate } from "@edujed/jedsvelted-ui/format";
+
+const departmentFields = $derived([
+  { label: "ID", value: department?.id, align: "right" as const },
+  { label: t("name", undefined, locale), value: department?.name },
+  {
+    label: t("employees", undefined, locale),
+    value: department?.employeeCount,
+    align: "right" as const,
+  },
+  {
+    label: t("annualBudget", undefined, locale),
+    value: formatCurrency(department?.annualBudget, locale, {
+      currency: "BRL",
+    }),
+    align: "right" as const,
+  },
+  {
+    label: t("createdAt", undefined, locale),
+    value: formatDate(department?.createdAt, locale),
+    align: "right" as const,
+  },
+]);
+```
+
+**`CurrencyField` in the edit form** — binds a plain `number`, displays with the currency symbol and locale-specific separators, and parses back on blur:
+
+```svelte
+<CurrencyField
+  id="department-edit-annual-budget"
+  label={t('annualBudget', undefined, locale)}
+  bind:value={formAnnualBudget}
+  decimals={2}
+  currency="BRL"
+  min={0}
+  colSpan={1}
+/>
+```
+
 ## 📋 Feature checklist
 
 - [x] Two full CRUD modules (users, departments) with table + detail panel
@@ -366,6 +479,11 @@ Demonstrates `FileTree` (expand/collapse, file selection, view callback) and `Me
 - [x] Themes (light/dark) via `initTheme()`
 - [x] i18n (en/pt-BR) — demo + lib messages merged, reactive to locale
 - [x] Centralized `Button` component (variants + icons from the library's icon registry)
+- [x] Skeleton loading states (`PageShell` table skeleton, `Skeleton` list/table variants in detail panels)
+- [x] `CurrencyField` form control (annual budget in Departments, locale-aware symbol + separators)
+- [x] `DateField` form control (hiring date in Users, native date picker with locale formatting)
+- [x] `format` module utilities (`formatCurrency`, `formatDate`) in table columns and detail panels
+- [x] `InfoGrid` right-alignment for numeric/date fields
 
 ## 🛠 Local development
 

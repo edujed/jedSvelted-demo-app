@@ -11,12 +11,17 @@
 	import { Table, type TableCol } from "@edujed/jedsvelted-ui/table";
 	import { createHandleDetail, type ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import { toast } from "@edujed/jedsvelted-ui/info";
+	import { formatCurrency } from "@edujed/jedsvelted-ui/format";
 	import { localeStore } from "@edujed/jedsvelted-ui/i18n";
 	import { t } from "../../i18n";
 
 	let locale = $derived($localeStore);
 
-	let pageShell: { showDetail: (row: Record<string, unknown>) => void; closeDetail: () => void } | undefined = $state(undefined);
+	let pageShell: {
+		showDetail: (row: Record<string, unknown>) => void;
+		closeDetail: () => void;
+		setLoadingFor: (ms: number) => void;
+	} | undefined = $state(undefined);
 
 	let {
 		autoOpenId = $bindable(0),
@@ -81,7 +86,11 @@
 	// Local state for search/filtering
 	let searchTerm = $state("");
 	const handleSearch = () => {
-		filteredDepartments = filterDepartments(DepartmentList, searchTerm);
+		// Simulate async loading so the skeleton is visible (mock is synchronous)
+		pageShell?.setLoadingFor(300);
+		setTimeout(() => {
+			filteredDepartments = filterDepartments(DepartmentList, searchTerm);
+		}, 300);
 	};
 	const handleClear = () => {
 		searchTerm = "";
@@ -111,6 +120,14 @@
 		{ key: "location", title: t('location', undefined, locale), align: "left", sortable: true, filterable: true },
 		{ key: "manager", title: t('manager', undefined, locale), align: "left", sortable: true, filterable: true },
 		{ key: "employeeCount", title: t('employees', undefined, locale), align: "right", sortable: true, filterable: false },
+		{
+			key: "annualBudget",
+			title: t('annualBudget', undefined, locale),
+			align: "right",
+			sortable: true,
+			filterable: false,
+			formatter: (value) => formatCurrency(value as number | undefined, locale)
+		},
 	]);
 </script>
 

@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { DetailShell } from "@edujed/jedsvelted-ui/pages";
-	import { EditField } from "@edujed/jedsvelted-ui/forms";
-	import { SelectField } from "@edujed/jedsvelted-ui/forms";
+	import { EditField, SelectField, DateField } from "@edujed/jedsvelted-ui/forms";
 	import { Panel } from "@edujed/jedsvelted-ui/container";
-	import { Button, InfoGrid } from "@edujed/jedsvelted-ui/ui";
+	import { Button, InfoGrid, Skeleton } from "@edujed/jedsvelted-ui/ui";
 	import {
 		RoleList,
 		StatusList,
@@ -54,6 +53,7 @@
 	let formDepartment = $state("");
 	let formRole = $state<UserRole>("U");
 	let formStatus = $state<UserStatus>("active");
+	let formHiringDate = $state<Date | undefined>(undefined);
 
 	$effect(() => {
 		if (user) {
@@ -62,6 +62,7 @@
 			formDepartment = user.department ?? "";
 			formRole = user.role ?? "U";
 			formStatus = user.status ?? "active";
+			formHiringDate = user.hiringDate ? new Date(user.hiringDate) : undefined;
 		}
 	});
 
@@ -76,21 +77,28 @@
 		{ label: t('role', undefined, locale), value: RoleList.find((r) => r.key === user?.role) ? t(RoleList.find((r) => r.key === user?.role)!.label as never, undefined, locale) : user?.role },
 		{ label: t('department', undefined, locale), value: user?.department },
 		{ label: t('status', undefined, locale), value: user?.status },
+		{ label: t('hiringDate', undefined, locale), value: user?.hiringDate ? new Date(user.hiringDate).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US') : undefined },
 		{ label: t('createdAt', undefined, locale), value: user?.createdAt ? new Date(user.createdAt).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US') : undefined },
 		{ label: t('lastLogin', undefined, locale), value: user?.lastLogin ? new Date(user.lastLogin).toLocaleString(locale === 'pt-BR' ? 'pt-BR' : 'en-US') : undefined },
 	]);
 
 	// Activity log state
 	let activity = $state<UserActivity[]>([]);
+	let activityLoading = $state(false);
 
 	$effect(() => {
 		if (user?.id) {
-			getActivityByUser(user.id).then((result) => {
-				activity = result.map((a) => ({
-				...a,
-				description: t(a.description as never, undefined, locale),
-			}));
-			});
+			activityLoading = true;
+			// Small delay so the skeleton is visible (mock resolves in ~150ms)
+			Promise.all([getActivityByUser(user.id), new Promise((r) => setTimeout(r, 300))]).then(
+				([result]) => {
+					activity = result.map((a) => ({
+					...a,
+					description: t(a.description as never, undefined, locale),
+				}));
+					activityLoading = false;
+				}
+			);
 		}
 	});
 
@@ -102,6 +110,7 @@
 			department: formDepartment || undefined,
 			role: formRole,
 			status: formStatus,
+			hiringDate: formHiringDate ? formHiringDate.toISOString() : undefined,
 		};
 		onAction?.(user?.id ? "update" : "create", updated);
 	}
@@ -156,10 +165,12 @@
                   {permissionId}
                   {onPermissionNotFound}
                 />
-              {:else if tabValue === 'activity'}
-                {#if activity.length === 0}
-                  <p class="empty-hint">{t('noActivity', undefined, locale)}</p>
-                {:else}
+              				{:else if tabValue === 'activity'}
+              					{#if activityLoading}
+              						<Skeleton variant="list" rows={3} />
+              					{:else if activity.length === 0}
+              						<p class="empty-hint">{t('noActivity', undefined, locale)}</p>
+              					{:else}
                   <div class="activity-list">
                     {#each activity as item (item.id)}
                       <div class="activity-item">
@@ -224,6 +235,15 @@
 						type="text"
 						placeholder="e.g. Engineering"
 						bind:value={formDepartment}
+						colSpan={2}
+					/>
+					<DateField
+						id="user-edit-hiring-date"
+						label={t('hiringDate', undefined, locale)}
+						hint={t('hiringDateHint', undefined, locale)}
+						hintTitle={t('hiringDate', undefined, locale)}
+						hintImpact={t('hiringDateHintImpact', undefined, locale)}
+						bind:value={formHiringDate}
 						colSpan={2}
 					/>
 				</div>

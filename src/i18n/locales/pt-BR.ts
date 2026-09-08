@@ -28,6 +28,9 @@ const ptBR: DemoMessages = {
   activity: "Atividade",
   noActivity: "Nenhuma atividade registrada para este usuário.",
   lastLogin: "Último acesso",
+  hiringDate: "Data de admissão",
+  hiringDateHint: "Data em que o usuário foi admitido.",
+  hiringDateHintImpact: "Usada para cálculo de tempo de casa e relatórios.",
   createdAt: "Criado em",
   email: "E-mail",
   ipAddress: "Endereço IP",
@@ -109,6 +112,10 @@ const ptBR: DemoMessages = {
   code: "Código",
   location: "Localização",
   employees: "Funcionários",
+  annualBudget: "Orçamento Anual",
+  annualBudgetHint: "Orçamento anual total alocado ao departamento.",
+  annualBudgetHintImpact:
+    "Usado para planejamento financeiro e alocação de recursos.",
   departmentSearchHint:
     "Digite para filtrar por nome, código, localização ou gerente",
   departmentSearchPlaceholder:

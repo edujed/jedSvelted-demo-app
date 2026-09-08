@@ -6,6 +6,7 @@ export interface Department {
   location?: string;
   manager?: string;
   employeeCount?: number;
+  annualBudget?: number;
   createdAt?: string;
 }
 
@@ -18,6 +19,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Eduardo Junior",
     employeeCount: 8,
+    annualBudget: 2500000,
     createdAt: "2023-01-15T09:00:00Z",
   },
   {
@@ -27,6 +29,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Maria Santos",
     employeeCount: 5,
+    annualBudget: 1800000,
     createdAt: "2023-03-22T10:30:00Z",
   },
   {
@@ -36,6 +39,7 @@ export const DepartmentList: Department[] = [
     location: "Building B",
     manager: "Carlos Mendes",
     employeeCount: 3,
+    annualBudget: 950000,
     createdAt: "2023-06-10T14:00:00Z",
   },
   {
@@ -45,6 +49,7 @@ export const DepartmentList: Department[] = [
     location: "Building C",
     manager: "Ana Rodrigues",
     employeeCount: 6,
+    annualBudget: 3200000,
     createdAt: "2023-08-05T08:00:00Z",
   },
   {
@@ -54,6 +59,7 @@ export const DepartmentList: Department[] = [
     location: "Building C",
     manager: "Pedro Silva",
     employeeCount: 4,
+    annualBudget: 1500000,
     createdAt: "2023-09-18T13:15:00Z",
   },
   {
@@ -63,6 +69,7 @@ export const DepartmentList: Department[] = [
     location: "Building B",
     manager: "Lúcia Ferreira",
     employeeCount: 3,
+    annualBudget: 780000,
     createdAt: "2024-01-10T10:00:00Z",
   },
   {
@@ -72,6 +79,7 @@ export const DepartmentList: Department[] = [
     location: "Building B",
     manager: "Jorge Oliveira",
     employeeCount: 4,
+    annualBudget: 1200000,
     createdAt: "2023-11-25T11:45:00Z",
   },
   {
@@ -81,6 +89,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Rafael Costa",
     employeeCount: 2,
+    annualBudget: 650000,
     createdAt: "2024-03-08T14:20:00Z",
   },
   {
@@ -90,6 +99,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Marta Lopes",
     employeeCount: 3,
+    annualBudget: 1100000,
     createdAt: "2024-04-22T08:15:00Z",
   },
   {
@@ -99,6 +109,7 @@ export const DepartmentList: Department[] = [
     location: "Building C",
     manager: "João Pereira",
     employeeCount: 5,
+    annualBudget: 890000,
     createdAt: "2024-05-30T10:00:00Z",
   },
   {
@@ -108,6 +119,7 @@ export const DepartmentList: Department[] = [
     location: "Building C",
     manager: "Clara Dias",
     employeeCount: 2,
+    annualBudget: 540000,
     createdAt: "2024-06-15T11:30:00Z",
   },
   {
@@ -117,6 +129,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Miguel Neto",
     employeeCount: 3,
+    annualBudget: 720000,
     createdAt: "2024-07-20T09:00:00Z",
   },
   {
@@ -126,6 +139,7 @@ export const DepartmentList: Department[] = [
     location: "Building B",
     manager: "Teresa Alves",
     employeeCount: 2,
+    annualBudget: 680000,
     createdAt: "2024-08-12T13:45:00Z",
   },
   {
@@ -135,6 +149,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Diego Ribeiro",
     employeeCount: 3,
+    annualBudget: 1350000,
     createdAt: "2024-11-25T14:00:00Z",
   },
   {
@@ -144,6 +159,7 @@ export const DepartmentList: Department[] = [
     location: "Building C",
     manager: "Vitória Campos",
     employeeCount: 2,
+    annualBudget: 980000,
     createdAt: "2024-12-10T09:20:00Z",
   },
   {
@@ -153,6 +169,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Lucas Mendes",
     employeeCount: 4,
+    annualBudget: 2100000,
     createdAt: "2025-01-08T11:00:00Z",
   },
   {
@@ -162,6 +179,7 @@ export const DepartmentList: Department[] = [
     location: "Building A",
     manager: "Júlia Torres",
     employeeCount: 3,
+    annualBudget: 1750000,
     createdAt: "2025-02-14T10:30:00Z",
   },
   {
@@ -171,6 +189,7 @@ export const DepartmentList: Department[] = [
     location: "Remote",
     manager: "Guest Visitor",
     employeeCount: 1,
+    annualBudget: 150000,
     createdAt: "2025-03-01T08:00:00Z",
   },
   {
@@ -180,6 +199,7 @@ export const DepartmentList: Department[] = [
     location: "Remote",
     manager: "ACME Representative",
     employeeCount: 1,
+    annualBudget: 200000,
     createdAt: "2025-04-15T09:30:00Z",
   },
   {
@@ -189,6 +209,7 @@ export const DepartmentList: Department[] = [
     location: "Remote",
     manager: "Temporary Consultant",
     employeeCount: 1,
+    annualBudget: 350000,
     createdAt: "2025-05-20T10:00:00Z",
   },
   {
@@ -198,6 +219,7 @@ export const DepartmentList: Department[] = [
     location: "Remote",
     manager: "Partner Company User",
     employeeCount: 1,
+    annualBudget: 420000,
     createdAt: "2025-06-10T14:30:00Z",
   },
 ];

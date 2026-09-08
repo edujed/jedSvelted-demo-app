@@ -21,7 +21,11 @@
 
 	let locale = $derived($localeStore);
 
-	let pageShell: { showDetail: (row: Record<string, unknown>) => void; closeDetail: () => void } | undefined = $state(undefined);
+	let pageShell: {
+		showDetail: (row: Record<string, unknown>) => void;
+		closeDetail: () => void;
+		setLoadingFor: (ms: number) => void;
+	} | undefined = $state(undefined);
 
 	let {
 		autoOpenId = $bindable(0),
@@ -115,7 +119,11 @@
 	// Local state for search/filtering
 	let searchTerm = $state("");
 	const handleSearch = () => {
-		filteredUsers = filterUsers(UserList, searchTerm, role as UserRole, status as UserStatus);
+		// Simulate async loading so the skeleton is visible (mock is synchronous)
+		pageShell?.setLoadingFor(300);
+		setTimeout(() => {
+			filteredUsers = filterUsers(UserList, searchTerm, role as UserRole, status as UserStatus);
+		}, 300);
 	};
 	const handleClear = () => {
 		role = "-";

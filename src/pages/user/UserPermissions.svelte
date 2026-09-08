@@ -4,6 +4,7 @@
 	import { EditField } from "@edujed/jedsvelted-ui/forms";
 	import { SelectField } from "@edujed/jedsvelted-ui/forms";
 	import { toast } from "@edujed/jedsvelted-ui/info";
+		import { Skeleton } from "@edujed/jedsvelted-ui/ui";
 	import { createHandleDetail, type ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import type { TableCol } from "@edujed/jedsvelted-ui/table";
 	import { localeStore } from "@edujed/jedsvelted-ui/i18n";
@@ -40,13 +41,19 @@
 	// with the locale without re-triggering the load effect.
 	let rawPermissions = $state<Permission[]>([]);
 	let lastLoadedId = $state<number | null>(null);
+	let permissionsLoading = $state(false);
 
 	$effect(() => {
 		if (id === lastLoadedId) return; // Only reload when the user actually changes
 		lastLoadedId = id;
-		getPermissionsByUser(id).then((result) => {
-			rawPermissions = result;
-		});
+		permissionsLoading = true;
+		// Small delay so the skeleton is visible (mock resolves in ~150ms)
+		Promise.all([getPermissionsByUser(id), new Promise((r) => setTimeout(r, 300))]).then(
+			([result]) => {
+				rawPermissions = result;
+				permissionsLoading = false;
+			}
+		);
 	});
 
 	// Translated view of the permissions — reactive to locale changes.
@@ -149,6 +156,11 @@
 	</div>
 {/snippet}
 
+{#if permissionsLoading}
+	<div class="permissions-loading">
+		<Skeleton variant="table" rows={4} />
+	</div>
+{:else}
 <CrudPanel
 	title={t('permissions', undefined, locale)}
 	csvFileName="permissions.csv"
@@ -196,6 +208,7 @@
 		/>
 	{/snippet}
 </CrudPanel>
+{/if}
 
 <style>
 	.form-fields {
@@ -208,5 +221,9 @@
 		.form-fields {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	.permissions-loading {
+		padding: var(--spacing-md);
 	}
 </style>

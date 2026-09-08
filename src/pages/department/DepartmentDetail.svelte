@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { DetailShell } from "@edujed/jedsvelted-ui/pages";
-	import { EditField, NumericField } from "@edujed/jedsvelted-ui/forms";
+	import { EditField, NumericField, CurrencyField } from "@edujed/jedsvelted-ui/forms";
 	import { Panel } from "@edujed/jedsvelted-ui/container";
 	import { Button, InfoGrid } from "@edujed/jedsvelted-ui/ui";
+	import { formatCurrency, formatDate } from "@edujed/jedsvelted-ui/format";
 	import type { Department } from "../../services/department.service";
 	import type { ActionEvent } from "@edujed/jedsvelted-ui/actions";
 	import { localeStore } from "@edujed/jedsvelted-ui/i18n";
@@ -29,6 +30,7 @@
 	let formLocation = $state("");
 	let formManager = $state("");
 	let formEmployeeCount = $state(0);
+	let formAnnualBudget = $state(0);
 
 	$effect(() => {
 		if (department) {
@@ -37,18 +39,20 @@
 			formLocation = department.location ?? "";
 			formManager = department.manager ?? "";
 			formEmployeeCount = department.employeeCount ?? 0;
+			formAnnualBudget = department.annualBudget ?? 0;
 		}
 	});
 
 	// Fields shared by the detail and delete modes.
 	const departmentFields = $derived([
-		{ label: "ID", value: department?.id },
+		{ label: "ID", value: department?.id, align: 'right' as const },
 		{ label: t('name', undefined, locale), value: department?.name },
 		{ label: t('code', undefined, locale), value: department?.code },
 		{ label: t('location', undefined, locale), value: department?.location },
 		{ label: t('manager', undefined, locale), value: department?.manager },
-		{ label: t('employees', undefined, locale), value: department?.employeeCount },
-		{ label: t('createdAt', undefined, locale), value: department?.createdAt ? new Date(department.createdAt).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US') : undefined },
+		{ label: t('employees', undefined, locale), value: department?.employeeCount, align: 'right' as const },
+		{ label: t('annualBudget', undefined, locale), value: formatCurrency(department?.annualBudget, locale, { currency: 'BRL' }), align: 'right' as const },
+		{ label: t('createdAt', undefined, locale), value: formatDate(department?.createdAt, locale), align: 'right' as const },
 	]);
 
 	function handleSave() {
@@ -59,6 +63,7 @@
 			location: formLocation || undefined,
 			manager: formManager || undefined,
 			employeeCount: formEmployeeCount || undefined,
+			annualBudget: formAnnualBudget || undefined,
 		};
 		onAction?.(department?.id ? "update" : "create", updated);
 	}
@@ -142,6 +147,18 @@
 						bind:value={formEmployeeCount}
 						min={0}
 						step={1}
+						colSpan={1}
+					/>
+					<CurrencyField
+						id="department-edit-annual-budget"
+						label={t('annualBudget', undefined, locale)}
+						hint={t('annualBudgetHint', undefined, locale)}
+						hintTitle={t('annualBudget', undefined, locale)}
+						hintImpact={t('annualBudgetHintImpact', undefined, locale)}
+						bind:value={formAnnualBudget}
+						decimals={2}
+						currency="BRL"
+						min={0}
 						colSpan={1}
 					/>
 				</div>
